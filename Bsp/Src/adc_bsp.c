@@ -1,0 +1,70 @@
+#include "adc_bsp.h"
+
+#include "gd32f4xx.h"
+#include "systick.h"
+
+/* ADC0 CH10 对应 PC0，DMA 循环把转换结果刷新到 adc_sample。 */
+#define ADC_BSP_PERIPH      ADC0
+#define ADC_BSP_CHANNEL     ADC_CHANNEL_10
+#define ADC_BSP_DATA_REG    ((uint32_t)&ADC_RDATA(ADC_BSP_PERIPH))
+
+#define ADC_BSP_GPIO_CLOCK  RCU_GPIOC
+#define ADC_BSP_GPIO_PORT   GPIOC
+#define ADC_BSP_GPIO_PIN    GPIO_PIN_0
+
+#define ADC_BSP_DMA_PERIPH  DMA1
+#define ADC_BSP_DMA_CLOCK   RCU_DMA1
+#define ADC_BSP_DMA_CH      DMA_CH0
+#define ADC_BSP_DMA_SUBPERI DMA_SUBPERI0
+
+static volatile uint16_t adc_sample;
+
+/* 初始化 ADC GPIO、ADC0 和 DMA 循环搬运链路。 */
+void adc_init(void)
+{
+    dma_single_data_parameter_struct dma_init_struct;
+
+    rcu_periph_clock_enable(ADC_BSP_GPIO_CLOCK);
+    rcu_periph_clock_enable(RCU_ADC0);
+    rcu_periph_clock_enable(ADC_BSP_DMA_CLOCK);
+
+    adc_clock_config(ADC_ADCCK_PCLK2_DIV8);
+
+    gpio_mode_set(ADC_BSP_GPIO_PORT, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, ADC_BSP_GPIO_PIN);
+
+    dma_deinit(ADC_BSP_DMA_PERIPH, ADC_BSP_DMA_CH);
+    dma_single_data_para_struct_init(&dma_init_struct);
+    dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
+    dma_init_struct.memory0_addr = (uint32_t)&adc_sample;
+    dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_DISABLE;
+    dma_init_struct.periph_addr = ADC_BSP_DATA_REG;
+    dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
+    dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_16BIT;
+    dma_init_struct.number = 1U;
+    dma_init_struct.priority = DMA_PRIORITY_HIGH;
+    dma_single_data_mode_init(ADC_BSP_DMA_PERIPH, ADC_BSP_DMA_CH, &dma_init_struct);
+    dma_circulation_enable(ADC_BSP_DMA_PERIPH, ADC_BSP_DMA_CH);
+    dma_channel_subperipheral_select(ADC_BSP_DMA_PERIPH, ADC_BSP_DMA_CH, ADC_BSP_DMA_SUBPERI);
+    dma_channel_enable(ADC_BSP_DMA_PERIPH, ADC_BSP_DMA_CH);
+
+    adc_sync_mode_config(ADC_SYNC_MODE_INDEPENDENT);
+    adc_special_function_config(ADC_BSP_PERIPH, ADC_CONTINUOUS_MODE, ENABLE);
+    adc_special_function_config(ADC_BSP_PERIPH, ADC_SCAN_MODE, DISABLE);
+    adc_data_alignment_config(ADC_BSP_PERIPH, ADC_DATAALIGN_RIGHT);
+    adc_channel_length_config(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL, 1U);
+    adc_routine_channel_config(ADC_BSP_PERIPH, 0U, ADC_BSP_CHANNEL, ADC_SAMPLETIME_84);
+    adc_external_trigger_config(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL, EXTERNAL_TRIGGER_DISABLE);
+    adc_dma_request_after_last_enable(ADC_BSP_PERIPH);
+    adc_dma_mode_enable(ADC_BSP_PERIPH);
+
+    adc_enable(ADC_BSP_PERIPH);
+    delay_1ms(1U);
+    adc_calibration_enable(ADC_BSP_PERIPH);
+    adc_software_trigger_enable(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL);
+}
+
+/* 读取 DMA 最近一次写入的原始 ADC 值。 */
+uint16_t adc_read(void)
+{
+    return adc_sample;
+}

@@ -1,0 +1,358 @@
+version: "4.1"
+name: GD32F470VE
+type: ARM
+deviceName: null
+packDir: null
+srcDirs: []
+virtualFolder:
+  name: <virtual_root>
+  files: []
+  folders:
+    - name: App
+      files:
+        - path: App/Src/adc_app.c
+        - path: App/Src/dac_app.c
+        - path: App/Src/btn_app.c
+        - path: App/Src/led_app.c
+        - path: App/Src/oled_app.c
+        - path: App/Src/rtc_app.c
+        - path: App/Src/scheduler.c
+        - path: App/Src/sd_app.c
+        - path: App/Src/uart0_app.c
+        - path: App/Src/rs485_app.c
+        - path: App/Src/pt100_app.c
+        - path: App/Src/pt100_convert.c
+      folders: []
+    - name: Core
+      files:
+        - path: Core/Src/main.c
+        - path: Core/Src/systick.c
+        - path: Core/Src/gd32f4xx_it.c
+        - path: Firmware/CMSIS/GD/GD32F4xx/Source/system_gd32f4xx.c
+      folders: []
+    - name: Bsp
+      files:
+        - path: Bsp/Src/adc_bsp.c
+        - path: Bsp/Src/dac_bsp.c
+        - path: Bsp/Src/uart0_bsp.c
+        - path: Bsp/Src/rs485_bsp.c
+        - path: Bsp/Src/rtc_bsp.c
+        - path: Bsp/Src/btn_bsp.c
+        - path: Bsp/Src/led_bsp.c
+        - path: Bsp/Src/oled_bsp.c
+        - path: Bsp/Src/flash_bsp.c
+        - path: Bsp/Src/gd30_bsp.c
+      folders: []
+    - name: Components
+      files: []
+      folders:
+        - name: gd25qxx
+          files:
+            - path: Compenents/gd25qxx/gd25qxx.c
+          folders: []
+        - name: gd30ad3344
+          files:
+            - path: Compenents/gd30ad3344/gd30ad3344.c
+          folders: []
+        - name: oled
+          files:
+            - path: Compenents/oled/oled.c
+            - path: Compenents/oled/oledfont.c
+          folders: []
+        - name: sdio
+          files:
+            - path: Compenents/sdio/sdio_sdcard.c
+          folders: []
+        - name: ring_buffer
+          files:
+            - path: Compenents/ring_buffer/ring_buffer.c
+          folders: []
+        - name: fatfs
+          files:
+            - path: Compenents/fatfs/diskio.c
+            - path: Compenents/fatfs/ff.c
+            - path: Compenents/fatfs/option/ccsbcs.c
+          folders: []
+    - name: Middleware
+      files: []
+      folders: []
+    - name: Firmware
+      files:
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_adc.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_can.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_crc.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_ctc.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dac.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dbg.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dci.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dma.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_enet.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_exmc.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_exti.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_fmc.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_fwdgt.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_gpio.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_i2c.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_ipa.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_iref.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_misc.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_pmu.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_rcu.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_rtc.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_sdio.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_spi.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_syscfg.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_timer.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_tli.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_trng.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_usart.c
+        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_wwdgt.c
+      folders: []
+    - name: Startup
+      files:
+        - path: Firmware/CMSIS/GD/GD32F4xx/Source/ARM/startup_gd32f450_470.s
+      folders: []
+    - name: ::CMSIS
+      files: []
+      folders: []
+dependenceList: []
+outDir: build
+miscInfo:
+  uid: b69946ae4824dd114484802d9a5435ec
+targets:
+  GD32F470VET6_Project:
+    cppPreprocessAttrs:
+      defineList:
+        - USE_STDPERIPH_DRIVER
+        - GD32F470
+        - __PERF_COUNTER_CFG_USE_SYSTICK_WRAPPER__
+      incList:
+        - Core/Inc
+        - App/Inc
+        - Bsp/Inc
+        - Compenents/gd30ad3344
+        - Compenents/oled
+        - Compenents/gd25qxx
+        - Compenents/sdio
+        - Compenents/fatfs
+        - Compenents/ring_buffer
+        - Firmware/GD32F4xx_standard_peripheral/Include
+        - .cmsis/include
+        - Firmware/CMSIS
+        - Firmware/CMSIS/GD/GD32F4xx/Include
+        - Project/RTE/_GD32F470VET6_Project
+      libList: []
+    excludeList: []
+    settings:
+      debugger: cortex-debug
+    toolchain: AC6
+    toolchainConfigMap:
+      AC5:
+        archExtensions: ""
+        cpuType: Cortex-M4
+        floatingPointHardware: single
+        options: ""
+        scatterFilePath: ""
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0x30000"
+                startAddr: "0x20000000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x10000"
+                startAddr: "0x10000000"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x80000"
+                startAddr: "0x8000000"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: IROM
+        useCustomScatterFile: false
+      AC6:
+        archExtensions: ""
+        cpuType: Cortex-M4
+        floatingPointHardware: single
+        options:
+          version: 3
+          afterBuildTasks: []
+          asm-compiler:
+            $use: asm-auto
+            defines: []
+            misc-controls: ""
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            language-c: c99
+            language-cpp: c++11
+            link-time-optimization: false
+            one-elf-section-per-function: true
+            optimization: level-1
+            short-enums#wchar: true
+            warnings: ac5-like-warnings
+          global:
+            output-debug-info: enable
+            use-microLIB: true
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            misc-controls: --diag_suppress=L6329
+            output-format: elf
+            ro-base: "0x08000000"
+            rw-base: "0x20000000"
+            xo-base: ""
+        scatterFilePath: ""
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0x30000"
+                startAddr: "0x20000000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x10000"
+                startAddr: "0x10000000"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x80000"
+                startAddr: "0x8000000"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: IROM
+        useCustomScatterFile: false
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+      OpenOCD:
+        baseAddr: "0x08000000"
+        bin: ""
+        interface: cmsis-dap
+        target: stm32f1x
+      pyOCD:
+        baseAddr: "0x08000000"
+        bin: ""
+        config: .eide/gd32f470vet6_project.pyocd.yaml
+        otherCmds: ""
+        speed: 10M
+        targetName: GD32F470VE
+    uploader: OpenOCD
