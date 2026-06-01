@@ -2,7 +2,6 @@
 
 #include "gd32f4xx.h"
 
-/* 按键硬件映射：时钟、端口、引脚放在一起，避免维护时错位。 */
 typedef struct {
     rcu_periph_enum clock;
     uint32_t port;
@@ -39,17 +38,16 @@ static uint8_t btn_is_valid(btn_id_t btn)
 
 static void btn_send_event(btn_id_t btn, btn_event_t event)
 {
-    if (btn_event_cb != 0)
-    {
+    if (btn_event_cb != 0) {
         btn_event_cb(btn, event);
     }
 }
 
-/* 按键使用上拉输入，松开为高电平，按下为低电平。 */
 void btn_init(btn_event_fn event)
 {
-    for (uint8_t i = 0U; i < (uint8_t)BTN_COUNT; i++)
-    {
+    uint8_t i;
+
+    for (i = 0U; i < (uint8_t)BTN_COUNT; i++) {
         const btn_hw_t *hw = &btn_hw[i];
 
         rcu_periph_clock_enable(hw->clock);
@@ -58,8 +56,7 @@ void btn_init(btn_event_fn event)
 
     btn_event_cb = event;
 
-    for (uint8_t i = 0U; i < (uint8_t)BTN_COUNT; i++)
-    {
+    for (i = 0U; i < (uint8_t)BTN_COUNT; i++) {
         btn_state_t *state = &btn_states[i];
 
         state->raw = btn_read((btn_id_t)i);
@@ -74,50 +71,41 @@ void btn_init(btn_event_fn event)
 
 uint8_t btn_read(btn_id_t btn)
 {
-    if (btn_is_valid(btn) == 0U)
-    {
+    if (btn_is_valid(btn) == 0U) {
         return 0U;
     }
 
-    /* 返回 1 表示按下，0 表示松开。 */
     return (gpio_input_bit_get(btn_hw[btn].port, btn_hw[btn].pin) == RESET) ? 1U : 0U;
 }
 
 void btn_scan(uint32_t now_ms)
 {
-    for (uint8_t i = 0U; i < (uint8_t)BTN_COUNT; i++)
-    {
+    uint8_t i;
+
+    for (i = 0U; i < (uint8_t)BTN_COUNT; i++) {
         btn_id_t btn = (btn_id_t)i;
         btn_state_t *state = &btn_states[i];
         uint8_t raw = btn_read(btn);
 
-        if (raw != state->raw)
-        {
+        if (raw != state->raw) {
             state->raw = raw;
             state->change_ms = now_ms;
         }
 
         if ((raw != state->stable) &&
-            ((uint32_t)(now_ms - state->change_ms) >= state->debounce_ms))
-        {
+            ((uint32_t)(now_ms - state->change_ms) >= state->debounce_ms)) {
             state->stable = raw;
 
-            if (state->stable != 0U)
-            {
+            if (state->stable != 0U) {
                 state->press_ms = now_ms;
                 state->long_sent = 0U;
                 btn_send_event(btn, BTN_EVT_PRESS);
-            }
-            else
-            {
+            } else {
                 btn_send_event(btn, BTN_EVT_RELEASE);
 
-                if (state->long_sent == 0U)
-                {
+                if (state->long_sent == 0U) {
                     btn_send_event(btn, BTN_EVT_CLICK);
-                }
-                else
-                {
+                } else {
                     btn_send_event(btn, BTN_EVT_LONG_RELEASE);
                 }
             }
@@ -125,8 +113,7 @@ void btn_scan(uint32_t now_ms)
 
         if ((state->stable != 0U) &&
             (state->long_sent == 0U) &&
-            ((uint32_t)(now_ms - state->press_ms) >= state->long_press_ms))
-        {
+            ((uint32_t)(now_ms - state->press_ms) >= state->long_press_ms)) {
             state->long_sent = 1U;
             btn_send_event(btn, BTN_EVT_LONG_PRESS);
         }

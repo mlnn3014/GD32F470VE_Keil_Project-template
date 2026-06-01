@@ -33,8 +33,8 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32f4xx_it.h"
+#include "app.h"
 #include "systick.h"
-#include "led_app.h"
 #include "rs485_bsp.h"
 #include "sdio_sdcard.h"
 #include "uart0_bsp.h"
@@ -178,5 +178,5 @@ void SDIO_IRQHandler(void)
 void SysTick_Handler(void)
 {
     delay_decrement();
-    led_app_blink_tick();
+    app_tick_1ms();
 }

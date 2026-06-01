@@ -4,7 +4,6 @@
 #include "ring_buffer.h"
 #include "systick.h"
 
-/* UART0 用作调试串口：PA9/PA10，波特率 115200。 */
 #define UART0_BSP_PERIPH        USART0
 #define UART0_BSP_CLOCK         RCU_USART0
 #define UART0_BSP_IRQn          USART0_IRQn
@@ -34,7 +33,6 @@
 
 #define UART0_BSP_RX_DMA_MASK   (UART0_BSP_RX_DMA_SIZE - 1U)
 
-/* RX 使用循环 DMA 接收，再搬运到软件环形缓冲给 App 读取。 */
 static uint8_t uart0_rx_dma_buffer[UART0_BSP_RX_DMA_SIZE];
 static volatile uint16_t uart0_rx_dma_read_index;
 static volatile uint8_t uart0_rx_poll_busy;
@@ -42,7 +40,6 @@ static volatile uint8_t uart0_rx_poll_busy;
 static uint8_t uart0_rx_ring_buffer[UART0_BSP_RX_RING_SIZE];
 static ring_buffer_t uart0_rx_ring;
 
-/* TX 先写入环形缓冲，再由 DMA 分段搬到 USART0 数据寄存器。 */
 static uint8_t uart0_tx_ring_buffer[UART0_BSP_TX_RING_SIZE];
 static ring_buffer_t uart0_tx_ring;
 static volatile uint16_t uart0_tx_dma_length;
@@ -70,7 +67,6 @@ static uint16_t uart0_rx_dma_write_index(void)
 {
     uint16_t write_index;
 
-    /* DMA 剩余计数反推出当前写入位置，缓冲区大小为 2 的幂可直接取掩码。 */
     write_index = (uint16_t)(UART0_BSP_RX_DMA_SIZE -
                              dma_transfer_number_get(UART0_BSP_DMA_PERIPH, UART0_BSP_RX_DMA_CH));
 
@@ -113,7 +109,6 @@ static void uart0_rx_copy_dma_to_ring(uint16_t write_index)
         return;
     }
 
-    /* 循环 DMA 可能从尾部绕回开头，需要拆成两段复制。 */
     if (write_index > read_index) {
         uart0_rx_copy_dma_block(read_index, (uint16_t)(write_index - read_index));
     } else {
@@ -126,7 +121,6 @@ static void uart0_rx_dma_config(void)
 {
     dma_single_data_parameter_struct dma_init;
 
-    /* RX DMA 开循环模式，硬件持续把 USART0 收到的字节写入缓存。 */
     dma_deinit(UART0_BSP_DMA_PERIPH, UART0_BSP_RX_DMA_CH);
     dma_single_data_para_struct_init(&dma_init);
     dma_init.direction = DMA_PERIPH_TO_MEMORY;
@@ -173,7 +167,6 @@ static void uart0_tx_start_dma(void)
         return;
     }
 
-    /* DMA 只能发送一段连续内存，环形缓冲跨尾部时下次中断再续发。 */
     length = ring_buffer_read_linear(&uart0_tx_ring);
 
     uart0_tx_dma_length = length;
@@ -223,7 +216,6 @@ void uart0_init(void)
     ring_buffer_init(&uart0_rx_ring, uart0_rx_ring_buffer, UART0_BSP_RX_RING_SIZE);
     ring_buffer_init(&uart0_tx_ring, uart0_tx_ring_buffer, UART0_BSP_TX_RING_SIZE);
 
-    /* 打开 GPIO、USART 和 DMA 时钟后配置 PA9/PA10 复用功能。 */
     rcu_periph_clock_enable(UART0_BSP_GPIO_CLOCK);
     rcu_periph_clock_enable(UART0_BSP_CLOCK);
     rcu_periph_clock_enable(UART0_BSP_DMA_CLOCK);
@@ -248,7 +240,6 @@ void uart0_init(void)
 
     nvic_irq_enable(UART0_BSP_IRQn, 0U, 0U);
     nvic_irq_enable(UART0_BSP_TX_DMA_IRQn, 1U, 0U);
-    /* IDLE 中断用于及时把当前 DMA 收到的数据同步到软件缓冲。 */
     usart_interrupt_enable(UART0_BSP_PERIPH, USART_INT_IDLE);
 }
 
@@ -355,7 +346,6 @@ void uart0_poll(void)
     uint16_t write_index;
     uint32_t primask;
 
-    /* 防止任务和 IDLE 中断同时搬运同一段 DMA 数据。 */
     primask = uart0_enter_critical();
     if (uart0_rx_poll_busy != 0U) {
         uart0_exit_critical(primask);
@@ -375,7 +365,6 @@ void uart0_poll(void)
 void uart0_irq_handler(void)
 {
     if (usart_interrupt_flag_get(UART0_BSP_PERIPH, USART_INT_FLAG_IDLE) != RESET) {
-        /* 读取 DATA 可清除 IDLE 标志，然后同步 DMA 新数据。 */
         (void)usart_data_receive(UART0_BSP_PERIPH);
         uart0_poll();
     }
@@ -388,7 +377,6 @@ void uart0_tx_dma_irq_handler(void)
         dma_interrupt_flag_clear(UART0_BSP_DMA_PERIPH, UART0_BSP_TX_DMA_CH,
                                  DMA_INT_FLAG_FTF);
         dma_channel_disable(UART0_BSP_DMA_PERIPH, UART0_BSP_TX_DMA_CH);
-        /* 当前连续段发送完毕，丢弃已发数据并尝试发送下一段。 */
         uart0_tx_finish_dma();
     }
 }

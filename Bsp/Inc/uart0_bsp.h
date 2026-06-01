@@ -2,7 +2,6 @@
 #define UART0_BSP_H
 
 #include <stdint.h>
-
 #include "gd32f4xx.h"
 
 #ifdef __cplusplus
@@ -17,9 +16,7 @@ typedef struct {
 } uart0_status_t;
 
 void uart0_init(void);
-/* uart0_write 可能只写入部分数据，返回已进入 TX 环形缓冲的字节数。 */
 uint16_t uart0_write(const uint8_t *data, uint16_t length);
-/* uart0_write_all 会等待 TX 空间，建议只在任务或主循环上下文调用。 */
 uint8_t uart0_write_all(const uint8_t *data, uint16_t length, uint32_t timeout_ms);
 uint16_t uart0_read(uint8_t *data, uint16_t length);
 uint8_t uart0_read_byte(uint8_t *data);

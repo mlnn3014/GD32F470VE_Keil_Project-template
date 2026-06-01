@@ -3,10 +3,6 @@
 
 #include "stdint.h"
 
-#ifndef SCHEDULER_STATS_ENABLE
-#define SCHEDULER_STATS_ENABLE 0U
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

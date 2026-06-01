@@ -119,24 +119,16 @@ static void pt100_save_channel_sample(gd30_channel_t channel, int16_t adc_raw)
 static void pt100_report(void)
 {
     pt100_data_t data = pt100_get_data();
-    uint16_t raw_hex = (uint16_t)data.adc_raw;
     int32_t temp = data.temperature_centi_c;
     int32_t temp_abs;
     int32_t resistance_ohm;
-    int32_t resistance_milliohm;
     char temp_sign = '+';
 
     if (data.status != PT100_STATUS_OK) {
-        (void)rs485_printf("PT100 status=%s raw=%d(0x%04X) adc=%lduV red=%lduV vf=%lduV lead=%lduV ref=%lduV ext=0x%04X %s\r\n",
+        (void)rs485_printf("PT100 %s raw=%d adc=%lduV ref=%s\r\n",
                            pt100_status_text(data.status),
                            data.adc_raw,
-                           raw_hex,
                            data.adc_microvolt,
-                           data.red_sense_microvolt,
-                           data.vforce_microvolt,
-                           data.lead_red_microvolt,
-                           data.reference_microvolt,
-                           gd30_bsp_get_extref_register(),
                            (data.reference_enabled != 0U) ? "ON" : "OFF");
         return;
     }
@@ -148,32 +140,19 @@ static void pt100_report(void)
         temp_abs = temp;
     }
 
-    resistance_ohm = data.resistance_milliohm / 1000L;
-    resistance_milliohm = data.resistance_milliohm % 1000L;
+    resistance_ohm = (data.resistance_milliohm + 500L) / 1000L;
 
-    (void)rs485_printf("PT100 status=%s raw=%d(0x%04X) adc=%lduV red=%lduV vf=%lduV lead=%lduV vpt=%lduV r=%ld.%03ld temp=%c%ld.%02ldC ref=%lduV ext=0x%04X %s\r\n",
-                       pt100_status_text(data.status),
-                       data.adc_raw,
-                       raw_hex,
-                       data.adc_microvolt,
-                       data.red_sense_microvolt,
-                       data.vforce_microvolt,
-                       data.lead_red_microvolt,
-                       data.pt100_microvolt,
-                       resistance_ohm,
-                       resistance_milliohm,
+    (void)rs485_printf("PT100 %c%ld.%02ldC R=%ldohm adc=%lduV ref=%s\r\n",
                        temp_sign,
                        temp_abs / 100L,
                        temp_abs % 100L,
-                       data.reference_microvolt,
-                       gd30_bsp_get_extref_register(),
+                       resistance_ohm,
+                       data.adc_microvolt,
                        (data.reference_enabled != 0U) ? "ON" : "OFF");
 }
 
-void pt100_app_init(void)
+static void pt100_clear_data(void)
 {
-    uint16_t adc_rx;
-
     pt100_data.adc_raw = 0;
     pt100_data.adc_microvolt = 0;
     pt100_data.red_sense_raw = 0;
@@ -187,12 +166,18 @@ void pt100_app_init(void)
     pt100_data.reference_microvolt = PT100_REFERENCE_UV;
     pt100_data.valid = 0U;
     pt100_data.status = PT100_STATUS_WAITING;
+    pt100_data.reference_enabled = 0U;
+}
+
+void pt100_app_init(void)
+{
+    pt100_clear_data();
     pt100_data.reference_enabled = gd30_bsp_enable_ain3_reference();
 
     pt100_channel_index = 0U;
     pt100_channel_valid_mask = 0U;
     pt100_read_wait_ms = gd30_rate_wait_ms(PT100_ADC_RATE);
-    if (gd30_transfer16(pt100_adc_config(pt100_channels[pt100_channel_index]), &adc_rx) != 0) {
+    if (gd30_bsp_configure(pt100_adc_config(pt100_channels[pt100_channel_index])) == 0U) {
         pt100_set_status(PT100_STATUS_SPI_ERROR);
     }
     pt100_next_read_ms = systick_get_ms() + pt100_read_wait_ms;

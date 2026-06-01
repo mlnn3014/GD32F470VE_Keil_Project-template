@@ -7,7 +7,6 @@
 extern "C" {
 #endif
 
-/* 板上 LED 编号，顺序对应 BSP 硬件映射表。 */
 typedef enum {
     LED_1 = 0,
     LED_2,
@@ -18,7 +17,6 @@ typedef enum {
     LED_COUNT
 } led_id_t;
 
-/* LED BSP 只负责 GPIO 初始化和单灯控制。 */
 void led_init(void);
 void led_on(led_id_t led);
 void led_off(led_id_t led);

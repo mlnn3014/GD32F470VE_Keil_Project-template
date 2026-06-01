@@ -385,6 +385,11 @@
           <GroupName>App</GroupName>
           <Files>
             <File>
+              <FileName>app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\app.c</FilePath>
+            </File>
+            <File>
               <FileName>adc_app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\Src\adc_app.c</FilePath>

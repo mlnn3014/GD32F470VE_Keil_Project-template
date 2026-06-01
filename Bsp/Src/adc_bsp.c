@@ -3,7 +3,6 @@
 #include "gd32f4xx.h"
 #include "systick.h"
 
-/* ADC0 CH10 对应 PC0，DMA 循环把转换结果刷新到 adc_sample。 */
 #define ADC_BSP_PERIPH      ADC0
 #define ADC_BSP_CHANNEL     ADC_CHANNEL_10
 #define ADC_BSP_DATA_REG    ((uint32_t)&ADC_RDATA(ADC_BSP_PERIPH))
@@ -19,7 +18,6 @@
 
 static volatile uint16_t adc_sample;
 
-/* 初始化 ADC GPIO、ADC0 和 DMA 循环搬运链路。 */
 void adc_init(void)
 {
     dma_single_data_parameter_struct dma_init_struct;
@@ -63,7 +61,6 @@ void adc_init(void)
     adc_software_trigger_enable(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL);
 }
 
-/* 读取 DMA 最近一次写入的原始 ADC 值。 */
 uint16_t adc_read(void)
 {
     return adc_sample;

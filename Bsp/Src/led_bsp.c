@@ -2,7 +2,6 @@
 
 #include "gd32f4xx.h"
 
-/* LED 硬件映射：时钟、端口、引脚放在一起，避免维护时错位。 */
 typedef struct {
     rcu_periph_enum clock;
     uint32_t port;
@@ -23,11 +22,11 @@ static uint8_t led_is_valid(led_id_t led)
     return ((uint32_t)led < (uint32_t)LED_COUNT);
 }
 
-/* 初始化所有 LED GPIO 为推挽输出。 */
 void led_init(void)
 {
-    for (uint8_t i = 0U; i < (uint8_t)LED_COUNT; i++)
-    {
+    uint8_t i;
+
+    for (i = 0U; i < (uint8_t)LED_COUNT; i++) {
         const led_hw_t *hw = &led_hw[i];
 
         rcu_periph_clock_enable(hw->clock);
@@ -36,11 +35,9 @@ void led_init(void)
     }
 }
 
-/* on 非 0 表示点亮，0 表示熄灭。 */
 void led_set(led_id_t led, uint8_t on)
 {
-    if (led_is_valid(led) == 0U)
-    {
+    if (led_is_valid(led) == 0U) {
         return;
     }
 
@@ -59,8 +56,7 @@ void led_off(led_id_t led)
 
 void led_toggle(led_id_t led)
 {
-    if (led_is_valid(led) == 0U)
-    {
+    if (led_is_valid(led) == 0U) {
         return;
     }
 

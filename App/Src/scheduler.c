@@ -45,13 +45,8 @@ void scheduler_run(void)
     uint32_t i;
 
     for (i = 0U; i < task_count; i++) {
-        while ((uint32_t)(now_ms - tasks[i].last_ms) >= tasks[i].period_ms) {
-            tasks[i].last_ms += tasks[i].period_ms;
-
-            if ((uint32_t)(now_ms - tasks[i].last_ms) >= tasks[i].period_ms) {
-                tasks[i].last_ms = now_ms;
-            }
-
+        if ((uint32_t)(now_ms - tasks[i].last_ms) >= tasks[i].period_ms) {
+            tasks[i].last_ms = now_ms;
             tasks[i].run();
         }
     }

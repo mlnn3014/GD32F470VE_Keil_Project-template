@@ -2,7 +2,6 @@
 
 #include "gd32f4xx.h"
 
-/* DAC BSP：配置 PA4/DAC0_OUT0，并保存限幅后的 12 位输出值。 */
 #define DAC_BSP_PERIPH     DAC0
 #define DAC_BSP_OUT        DAC_OUT0
 #define DAC_BSP_GPIO_CLOCK RCU_GPIOA

@@ -16,7 +16,6 @@ typedef struct {
 } rs485_status_t;
 
 void rs485_init(void);
-/* 非阻塞写入，返回实际进入 TX 队列的字节数。 */
 uint16_t rs485_write(const uint8_t *data, uint16_t length);
 uint16_t rs485_read(uint8_t *data, uint16_t length);
 uint16_t rs485_available(void);

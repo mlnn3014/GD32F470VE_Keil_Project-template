@@ -3,7 +3,6 @@
 #include "gd32f4xx.h"
 #include "ring_buffer.h"
 
-/* USART1 RS485：PA1 控制方向，PA2/PA3 为 TX/RX。 */
 #define RS485_PERIPH        USART1
 #define RS485_CLOCK         RCU_USART1
 #define RS485_IRQn          USART1_IRQn
@@ -32,7 +31,6 @@
 
 #define RS485_RX_DMA_MASK   (RS485_RX_DMA_SIZE - 1U)
 
-/* RX 路径：USART DMA 循环缓冲 -> 软件 RX 队列 -> App 读取。 */
 static uint8_t rs485_rx_dma_buffer[RS485_RX_DMA_SIZE];
 static volatile uint16_t rs485_rx_dma_read_index;
 static volatile uint8_t rs485_rx_poll_busy;
@@ -40,7 +38,6 @@ static volatile uint8_t rs485_rx_poll_busy;
 static uint8_t rs485_rx_ring_buffer[RS485_RX_RING_SIZE];
 static ring_buffer_t rs485_rx_ring;
 
-/* TX 路径：App 写入 TX 队列，USART TBE/TC 中断推进发送。 */
 static uint8_t rs485_tx_ring_buffer[RS485_TX_RING_SIZE];
 static ring_buffer_t rs485_tx_ring;
 static volatile uint8_t rs485_tx_busy_flag;
@@ -65,13 +62,11 @@ static void rs485_exit_critical(uint32_t primask)
 
 static void rs485_set_tx_mode(void)
 {
-    /* 驱动 485 芯片进入发送模式。 */
     gpio_bit_set(RS485_GPIO_PORT, RS485_DIR_PIN);
 }
 
 static void rs485_set_rx_mode(void)
 {
-    /* 释放总线，回到接收模式。 */
     gpio_bit_reset(RS485_GPIO_PORT, RS485_DIR_PIN);
 }
 
@@ -98,7 +93,6 @@ static void rs485_tx_start_locked(void)
     }
 
     rs485_tx_busy_flag = 1U;
-    /* 先切换方向，再写入首字节。 */
     rs485_set_tx_mode();
     usart_interrupt_disable(RS485_PERIPH, USART_INT_TC);
     usart_interrupt_flag_clear(RS485_PERIPH, USART_INT_FLAG_TC);
@@ -110,13 +104,11 @@ static void rs485_tx_handle_tbe(void)
 {
     uint8_t data;
 
-    /* TBE 表示发送数据寄存器空，可以塞入下一个字节。 */
     if (rs485_tx_pop_byte_fast(&data) != 0U) {
         usart_data_transmit(RS485_PERIPH, data);
         return;
     }
 
-    /* 队列已空，等待 TC 确认最后一字节完全发出。 */
     usart_interrupt_disable(RS485_PERIPH, USART_INT_TBE);
     usart_interrupt_flag_clear(RS485_PERIPH, USART_INT_FLAG_TC);
     usart_interrupt_enable(RS485_PERIPH, USART_INT_TC);
@@ -128,7 +120,6 @@ static void rs485_tx_handle_tc(void)
 
     usart_interrupt_disable(RS485_PERIPH, USART_INT_TC);
     usart_interrupt_flag_clear(RS485_PERIPH, USART_INT_FLAG_TC);
-    /* TC 在停止位发完后置位，此时才能释放总线。 */
     rs485_set_rx_mode();
 
     primask = rs485_enter_critical();
@@ -159,7 +150,6 @@ static uint16_t rs485_rx_dma_write_index(void)
 {
     uint16_t write_index;
 
-    /* 由 DMA 剩余计数反推循环缓冲当前写入位置。 */
     write_index = (uint16_t)(RS485_RX_DMA_SIZE -
                              dma_transfer_number_get(RS485_DMA_PERIPH, RS485_RX_DMA_CH));
 
@@ -202,7 +192,6 @@ static void rs485_rx_copy_dma_to_ring(uint16_t write_index)
         return;
     }
 
-    /* DMA 可能绕回头部，因此最多拆成两段复制。 */
     if (write_index > read_index) {
         rs485_rx_copy_dma_block(read_index, (uint16_t)(write_index - read_index));
     } else {
@@ -215,7 +204,6 @@ static void rs485_rx_dma_config(void)
 {
     dma_single_data_parameter_struct dma_init;
 
-    /* 循环 DMA 保证 App 忙时串口仍可持续接收。 */
     dma_deinit(RS485_DMA_PERIPH, RS485_RX_DMA_CH);
     dma_single_data_para_struct_init(&dma_init);
     dma_init.direction = DMA_PERIPH_TO_MEMORY;
@@ -247,7 +235,6 @@ void rs485_init(void)
     rcu_periph_clock_enable(RS485_CLOCK);
     rcu_periph_clock_enable(RS485_DMA_CLOCK);
 
-    /* 配置串口复用引脚和独立的 485 方向控制脚。 */
     gpio_af_set(RS485_GPIO_PORT, RS485_GPIO_AF, RS485_TX_PIN | RS485_RX_PIN);
     gpio_mode_set(RS485_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP,
                   RS485_TX_PIN | RS485_RX_PIN);
@@ -270,7 +257,6 @@ void rs485_init(void)
     usart_enable(RS485_PERIPH);
 
     nvic_irq_enable(RS485_IRQn, 0U, 1U);
-    /* IDLE 中断用于及时把 DMA 新数据同步到 RX 队列。 */
     usart_interrupt_enable(RS485_PERIPH, USART_INT_IDLE);
 }
 
@@ -280,7 +266,6 @@ uint16_t rs485_write(const uint8_t *data, uint16_t length)
         return 0U;
     }
 
-    /* 非阻塞：能写多少写多少，然后立即返回。 */
     return rs485_tx_write_buffer(data, length, 1U);
 }
 
@@ -350,7 +335,6 @@ void rs485_poll(void)
     uint16_t write_index;
     uint32_t primask;
 
-    /* 防止任务和 IDLE 中断同时搬运同一段 DMA 数据。 */
     primask = rs485_enter_critical();
     if (rs485_rx_poll_busy != 0U) {
         rs485_exit_critical(primask);
@@ -370,7 +354,6 @@ void rs485_poll(void)
 void rs485_irq_handler(void)
 {
     if (usart_interrupt_flag_get(RS485_PERIPH, USART_INT_FLAG_IDLE) != RESET) {
-        /* 读取 DATA 清除 IDLE 标志，再同步 DMA 数据。 */
         (void)usart_data_receive(RS485_PERIPH);
         rs485_poll();
     }

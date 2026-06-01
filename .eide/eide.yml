@@ -118,7 +118,7 @@ virtualFolder:
 dependenceList: []
 outDir: build
 miscInfo:
-  uid: b69946ae4824dd114484802d9a5435ec
+  uid: 24432df8d7a0241fa0050d4798ca2f7d
 targets:
   GD32F470VET6_Project:
     cppPreprocessAttrs:
@@ -147,86 +147,6 @@ targets:
       debugger: cortex-debug
     toolchain: AC6
     toolchainConfigMap:
-      AC5:
-        archExtensions: ""
-        cpuType: Cortex-M4
-        floatingPointHardware: single
-        options: ""
-        scatterFilePath: ""
-        storageLayout:
-          RAM:
-            - id: 1
-              isChecked: false
-              mem:
-                size: "0x0"
-                startAddr: "0x0"
-              noInit: false
-              tag: RAM
-            - id: 2
-              isChecked: false
-              mem:
-                size: "0x0"
-                startAddr: "0x0"
-              noInit: false
-              tag: RAM
-            - id: 3
-              isChecked: false
-              mem:
-                size: "0x0"
-                startAddr: "0x0"
-              noInit: false
-              tag: RAM
-            - id: 1
-              isChecked: true
-              mem:
-                size: "0x30000"
-                startAddr: "0x20000000"
-              noInit: false
-              tag: IRAM
-            - id: 2
-              isChecked: false
-              mem:
-                size: "0x10000"
-                startAddr: "0x10000000"
-              noInit: false
-              tag: IRAM
-          ROM:
-            - id: 1
-              isChecked: false
-              isStartup: false
-              mem:
-                size: "0x0"
-                startAddr: "0x0"
-              tag: ROM
-            - id: 2
-              isChecked: false
-              isStartup: false
-              mem:
-                size: "0x0"
-                startAddr: "0x0"
-              tag: ROM
-            - id: 3
-              isChecked: false
-              isStartup: false
-              mem:
-                size: "0x0"
-                startAddr: "0x0"
-              tag: ROM
-            - id: 1
-              isChecked: true
-              isStartup: true
-              mem:
-                size: "0x80000"
-                startAddr: "0x8000000"
-              tag: IROM
-            - id: 2
-              isChecked: false
-              isStartup: false
-              mem:
-                size: "0x0"
-                startAddr: "0x0"
-              tag: IROM
-        useCustomScatterFile: false
       AC6:
         archExtensions: ""
         cpuType: Cortex-M4
@@ -343,16 +263,4 @@ targets:
         otherCmds: ""
         proType: 1
         speed: 8000
-      OpenOCD:
-        baseAddr: "0x08000000"
-        bin: ""
-        interface: cmsis-dap
-        target: stm32f1x
-      pyOCD:
-        baseAddr: "0x08000000"
-        bin: ""
-        config: .eide/gd32f470vet6_project.pyocd.yaml
-        otherCmds: ""
-        speed: 10M
-        targetName: GD32F470VE
-    uploader: OpenOCD
+    uploader: JLink
