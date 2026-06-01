@@ -5,7 +5,8 @@
 #include "led_bsp.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 void led_app_init(void);
@@ -17,11 +18,11 @@ void led_app_blink_off(led_id_t led);
 void led_app_blink_toggle(led_id_t led, uint16_t interval_ms);
 void led_app_blink_times(led_id_t led, uint16_t times, uint16_t interval_ms);
 
-/* Called by the 1 ms system tick. */
+/* 1ms中断里调用。 */
 void led_app_blink_tick(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LED_APP_H */
+#endif

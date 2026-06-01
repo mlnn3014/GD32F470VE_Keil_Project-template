@@ -5,7 +5,8 @@
 #include "uart0_bsp.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 typedef void (*uart0_line_handler_t)(const char *line);
@@ -19,4 +20,4 @@ void uart0_task(void);
 }
 #endif
 
-#endif /* UART0_APP_H */
+#endif

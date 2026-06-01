@@ -2,7 +2,8 @@
 #define APP_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 void app_init(void);
@@ -13,4 +14,4 @@ void app_tick_1ms(void);
 }
 #endif
 
-#endif /* APP_H */
+#endif

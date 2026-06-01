@@ -9,11 +9,12 @@ ColumnLimit: 0
 Language: Cpp
 AccessModifierOffset: -4
 NamespaceIndentation: All
+IndentExternBlock: NoIndent
 FixNamespaceComments: false
-BreakBeforeBraces: Linux
-AllowShortIfStatementsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
-AllowShortBlocksOnASingleLine: true
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: false
 IndentCaseLabels: true
 SortIncludes: false
 AlignConsecutiveMacros: AcrossEmptyLines

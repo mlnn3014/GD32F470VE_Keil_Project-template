@@ -2,7 +2,8 @@
 #define OLED_APP_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 void oled_task(void);
@@ -11,4 +12,4 @@ void oled_task(void);
 }
 #endif
 
-#endif /* OLED_APP_H */
+#endif

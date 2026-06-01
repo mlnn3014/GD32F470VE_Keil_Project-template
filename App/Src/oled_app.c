@@ -3,18 +3,16 @@
 #include "oled.h"
 #include "pt100_app.h"
 #include "rtc_app.h"
-#include "systick.h"
 
-#include <stdint.h>
-
-#define OLED_ROW_TEMP 0U
-#define OLED_ROW_ADC  1U
-#define OLED_ROW_REF  2U
-#define OLED_ROW_TIME 3U
+#define OLED_ROW_TEMP 0
+#define OLED_ROW_ADC 1
+#define OLED_ROW_REF 2
+#define OLED_ROW_TIME 3
 
 static const char *oled_pt100_status_text(pt100_status_t status)
 {
-    switch (status) {
+    switch (status)
+    {
     case PT100_STATUS_OK:
         return "OK";
     case PT100_STATUS_SPI_ERROR:
@@ -23,65 +21,36 @@ static const char *oled_pt100_status_text(pt100_status_t status)
         return "UNDER";
     case PT100_STATUS_OVER_RANGE:
         return "OVER";
-    case PT100_STATUS_WAITING:
     default:
-        return "WAITING";
+        return "WAIT";
     }
 }
 
-static void oled_draw_status(void)
+static void oled_show_pt100(pt100_data_t data)
 {
-    pt100_data_t pt100 = pt100_get_data();
-    rtc_time_t rtc_time = rtc_get_time();
-    int32_t temp = pt100.temperature_centi_c;
-    int64_t temp_abs;
-    char temp_sign = '+';
+    int32_t temp = data.temperature_centi_c;
+    int32_t temp_abs = (temp < 0) ? -temp : temp;
+    char sign = (temp < 0) ? '-' : '+';
 
-    if (temp < 0) {
-        temp_sign = '-';
-        temp_abs = -(int64_t)temp;
-    } else {
-        temp_abs = temp;
+    if (data.valid)
+    {
+        oled_text_printf(OLED_FONT_8, OLED_ROW_TEMP, 0, 0, "PT100:%c%ld.%02ldC", sign, (long)(temp_abs / 100), (long)(temp_abs % 100));
+    }
+    else
+    {
+        oled_text_printf(OLED_FONT_8, OLED_ROW_TEMP, 0, 0, "PT100:%s", oled_pt100_status_text(data.status));
     }
 
-    if (pt100.valid != 0U) {
-        (void)oled_text_printf(OLED_FONT_8, OLED_ROW_TEMP, 0U, 0U,
-                               "PT100:%c%ld.%02ldC",
-                               temp_sign,
-                               (long)(temp_abs / 100L),
-                               (long)(temp_abs % 100L));
-        (void)oled_text_printf(OLED_FONT_8, OLED_ROW_ADC, 0U, 0U,
-                               "AIN0:%6d %4ldmV",
-                               pt100.adc_raw,
-                               pt100.adc_microvolt / 1000L);
-    } else {
-        (void)oled_text_printf(OLED_FONT_8, OLED_ROW_TEMP, 0U, 0U,
-                               "PT100:%s",
-                               oled_pt100_status_text(pt100.status));
-        (void)oled_text_printf(OLED_FONT_8, OLED_ROW_ADC, 0U, 0U,
-                               "AIN0:%6d %4ldmV",
-                               pt100.adc_raw,
-                               pt100.adc_microvolt / 1000L);
-    }
-
-    if (pt100.reference_microvolt > 0L) {
-        (void)oled_text_printf(OLED_FONT_8, OLED_ROW_REF, 0U, 0U,
-                               "EXT:%s L:%3ldmV",
-                               (pt100.reference_enabled != 0U) ? "ON " : "OFF",
-                               pt100.lead_red_microvolt / 1000L);
-    } else {
-        (void)oled_text_show(OLED_FONT_8, OLED_ROW_REF, 0U, 0U, "EXTREF: waiting");
-    }
-
-    (void)oled_text_printf(OLED_FONT_8, OLED_ROW_TIME, 0U, 0U,
-                           "TIME:%02u:%02u:%02u",
-                           rtc_time.hour,
-                           rtc_time.minute,
-                           rtc_time.second);
+    oled_text_printf(OLED_FONT_8, OLED_ROW_ADC, 0, 0, "AIN0:%6d %4ldmV", data.adc_raw, (long)(data.adc_microvolt / 1000));
+    oled_text_printf(OLED_FONT_8, OLED_ROW_REF, 0, 0, "REF:%s L:%3ldmV", data.reference_enabled ? "ON " : "OFF", (long)(data.lead_red_microvolt / 1000));
 }
 
 void oled_task(void)
 {
-    oled_draw_status();
-    (void)oled_service();
+    pt100_data_t pt100 = pt100_get_data();
+    rtc_time_t time = rtc_get_time();
+
+    oled_show_pt100(pt100);
+    oled_text_printf(OLED_FONT_8, OLED_ROW_TIME, 0, 0, "TIME:%02u:%02u:%02u", (unsigned)time.hour, (unsigned)time.minute, (unsigned)time.second);
+    oled_service();
 }

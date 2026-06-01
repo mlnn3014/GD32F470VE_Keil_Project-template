@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include "ff.h"
 
-typedef struct {
+typedef struct
+{
     FIL handle;
     uint8_t opened;
 } sd_file_t;
@@ -27,4 +28,4 @@ int sd_file_close(sd_file_t *file);
 void sd_print_info(void);
 int sd_self_test(void);
 
-#endif /* SD_APP_H */
+#endif

@@ -6,7 +6,8 @@
 #include "rtc_bsp.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 void rtc_app_init(void);
@@ -19,4 +20,4 @@ rtc_time_t rtc_get_time(void);
 }
 #endif
 
-#endif /* RTC_APP_H */
+#endif

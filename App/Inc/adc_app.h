@@ -4,10 +4,12 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef struct {
+typedef struct
+{
     uint16_t sample;
     uint16_t millivolt;
 } adc_data_t;
@@ -20,4 +22,4 @@ adc_data_t adc_get_data(void);
 }
 #endif
 
-#endif /* ADC_APP_H */
+#endif

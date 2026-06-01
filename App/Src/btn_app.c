@@ -4,11 +4,12 @@
 #include "led_app.h"
 #include "systick.h"
 
-#define BTN_LED_BLINK_MS 100U
+#define BTN_LED_BLINK_MS 100
 
 static void btn_click(btn_id_t btn)
 {
-    switch (btn) {
+    switch (btn)
+    {
     case BTN_1:
         led_app_blink_toggle(LED_1, BTN_LED_BLINK_MS);
         break;
@@ -35,7 +36,8 @@ static void btn_click(btn_id_t btn)
 
 static void btn_event(btn_id_t btn, btn_event_t event)
 {
-    if (event == BTN_EVT_CLICK) {
+    if (event == BTN_EVT_CLICK)
+    {
         btn_click(btn);
     }
 }

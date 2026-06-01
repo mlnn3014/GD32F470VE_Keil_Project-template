@@ -9,28 +9,29 @@ int main(void)
     systick_config();
     app_init();
 
-    while(1) {
+    while (1)
+    {
         app_loop();
     }
 }
 
 #ifdef GD_ECLIPSE_GCC
-/* retarget the C library printf function to the USART, in Eclipse GCC environment */
+/* GCC环境下把printf接到UART0。 */
 int __io_putchar(int ch)
 {
     uint8_t data = (uint8_t)ch;
 
-    (void)uart0_write(&data, 1U);
+    (void)uart0_write(&data, 1);
     return ch;
 }
 #else
-/* retarget the C library printf function to the USART */
+/* Keil环境下把printf接到UART0。 */
 int fputc(int ch, FILE *f)
 {
     uint8_t data = (uint8_t)ch;
 
     (void)f;
-    (void)uart0_write(&data, 1U);
+    (void)uart0_write(&data, 1);
     return ch;
 }
-#endif /* GD_ECLIPSE_GCC */
+#endif

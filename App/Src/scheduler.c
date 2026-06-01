@@ -10,21 +10,22 @@
 #include "systick.h"
 #include "uart0_app.h"
 
-typedef struct {
+typedef struct
+{
     void (*run)(void);
     uint32_t period_ms;
     uint32_t last_ms;
 } task_t;
 
 static task_t tasks[] = {
-    {uart0_task, 5U,   0U},
-    {rs485_task, 5U,   0U},
-    {btn_task,   5U,   0U},
-    {pt100_task, 1U,   0U},
-    {rtc_task,   50U,  0U},
-    {adc_task,   100U, 0U},
-    {dac_task,   100U, 0U},
-    {oled_task,  100U, 0U}
+    {uart0_task, 5, 0},
+    {rs485_task, 5, 0},
+    {btn_task, 5, 0},
+    {pt100_task, 1, 0},
+    {rtc_task, 50, 0},
+    {adc_task, 100, 0},
+    {dac_task, 100, 0},
+    {oled_task, 100, 0},
 };
 
 static const uint32_t task_count = sizeof(tasks) / sizeof(tasks[0]);
@@ -32,9 +33,9 @@ static const uint32_t task_count = sizeof(tasks) / sizeof(tasks[0]);
 void scheduler_init(void)
 {
     uint32_t now_ms = systick_get_ms();
-    uint32_t i;
 
-    for (i = 0U; i < task_count; i++) {
+    for (uint32_t i = 0; i < task_count; i++)
+    {
         tasks[i].last_ms = now_ms;
     }
 }
@@ -42,10 +43,11 @@ void scheduler_init(void)
 void scheduler_run(void)
 {
     uint32_t now_ms = systick_get_ms();
-    uint32_t i;
 
-    for (i = 0U; i < task_count; i++) {
-        if ((uint32_t)(now_ms - tasks[i].last_ms) >= tasks[i].period_ms) {
+    for (uint32_t i = 0; i < task_count; i++)
+    {
+        if ((uint32_t)(now_ms - tasks[i].last_ms) >= tasks[i].period_ms)
+        {
             tasks[i].last_ms = now_ms;
             tasks[i].run();
         }

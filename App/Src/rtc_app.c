@@ -11,7 +11,8 @@ void rtc_task(void)
 {
     rtc_datetime_t now;
 
-    if (rtc_read_datetime(&now) == 0) {
+    if (rtc_read_datetime(&now) == 0)
+    {
         rtc_datetime = now;
     }
 }
@@ -30,8 +31,6 @@ rtc_date_t rtc_get_date(void)
 
 rtc_datetime_t rtc_get_datetime(void)
 {
-    rtc_datetime_t datetime;
-
     return rtc_datetime;
 }
 

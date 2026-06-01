@@ -4,7 +4,8 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 void dac_app_init(void);
@@ -16,4 +17,4 @@ uint16_t dac_get_value(void);
 }
 #endif
 
-#endif /* DAC_APP_H */
+#endif

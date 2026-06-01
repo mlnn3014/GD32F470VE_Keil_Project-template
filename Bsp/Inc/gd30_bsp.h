@@ -4,24 +4,25 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-/* Initialize the GD30AD3344 SPI0 bus and CS pin. */
+/* 初始化GD30AD3344的SPI和CS引脚。 */
 void gd30_bus_init(void);
-/* Enable AIN3 as GD30AD3344 external reference. Returns 1 after readback confirms it. */
+/* 打开AIN3外部参考，读回确认后返回1。 */
 uint8_t gd30_bsp_enable_ain3_reference(void);
 uint16_t gd30_bsp_get_extref_register(void);
-/* Write and read back the config register. Returns 1 after key bits match. */
+/* 写配置寄存器，关键位读回一致后返回1。 */
 uint8_t gd30_bsp_configure(uint16_t config);
 uint16_t gd30_bsp_get_config_register(void);
-/* Perform one 16-bit exchange under one CS assertion. Returns 0 on success. */
+/* CS拉低期间交换一个16位数据。 */
 int gd30_transfer16(uint16_t tx, uint16_t *rx);
-/* Exchange multiple 16-bit words while CS remains asserted. Returns 0 on success. */
+/* CS保持拉低，连续交换多个16位数据。 */
 int gd30_transfer16_sequence(const uint16_t *tx, uint16_t *rx, uint32_t count);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* GD30_BSP_H */
+#endif

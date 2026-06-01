@@ -41,7 +41,7 @@ void app_init(void)
     rtc_clock_init();
     rtc_app_init();
 
-    delay_1ms(200U);
+    delay_1ms(200);
     (void)sd_app_init();
 
     btn_app_init();
