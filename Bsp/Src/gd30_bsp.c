@@ -17,7 +17,7 @@
 #define GD30_CS_PORT_CLK RCU_GPIOE
 #define GD30_PIN_CS GPIO_PIN_8
 
-/* 外部参考电压寄存器，来自厂家示例。 */
+/* 外部参考电压寄存器 */
 #define GD30_PROCESS_REGISTER 0x0012
 #define GD30_PROCESS_VALUE 0xACCA
 #define GD30_EXTREF_REGISTER 0x0014
@@ -26,7 +26,7 @@
 #define GD30_EXTREF_WRITE_CMD 0x8100
 #define GD30_SPI_TIMEOUT 100000
 
-/* CS时序按厂家示例留一点余量。 */
+/* CS时序按 */
 #define GD30_CS_SETUP_MS 1
 #define GD30_CS_HOLD_US 100
 #define GD30_CS_RECOVERY_MS 10

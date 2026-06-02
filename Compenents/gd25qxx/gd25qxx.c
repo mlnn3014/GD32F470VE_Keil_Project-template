@@ -1,10 +1,7 @@
 #include "gd25qxx.h"
 
-#include <string.h>
-
 #include "flash_bsp.h"
 #include "systick.h"
-#include "uart0_app.h"
 
 #define FLASH_CMD_WRITE          0x02U
 #define FLASH_CMD_WRITE_ENABLE   0x06U
@@ -271,34 +268,4 @@ int flash_erase_chip(void)
 flash_info_t flash_get_info(void)
 {
     return flash_info;
-}
-
-int flash_self_test(uint32_t addr)
-{
-    static const char message[] = "GD32 flash self test";
-    uint8_t read_buffer[sizeof(message)];
-    uint32_t sector_addr = addr & ~(FLASH_SECTOR_SIZE - 1U);
-
-    uart0_printf("FLASH: self test at 0x%lX\r\n", sector_addr);
-
-    if (flash_erase_sector(sector_addr) != 0) {
-        uart0_printf("FLASH: erase failed\r\n");
-        return -1;
-    }
-    if (flash_write(sector_addr, (const uint8_t *)message, sizeof(message)) != 0) {
-        uart0_printf("FLASH: write failed\r\n");
-        return -2;
-    }
-    memset(read_buffer, 0, sizeof(read_buffer));
-    if (flash_read(sector_addr, read_buffer, sizeof(read_buffer)) != 0) {
-        uart0_printf("FLASH: read failed\r\n");
-        return -3;
-    }
-    if (memcmp(read_buffer, message, sizeof(message)) != 0) {
-        uart0_printf("FLASH: verify failed\r\n");
-        return -4;
-    }
-
-    uart0_printf("FLASH: self test ok\r\n");
-    return 0;
 }

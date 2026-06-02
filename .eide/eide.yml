@@ -11,15 +11,15 @@ virtualFolder:
     - name: App
       files:
         - path: App/Src/adc_app.c
-        - path: App/Src/dac_app.c
         - path: App/Src/btn_app.c
         - path: App/Src/led_app.c
         - path: App/Src/oled_app.c
         - path: App/Src/rtc_app.c
         - path: App/Src/scheduler.c
-        - path: App/Src/sd_app.c
+        - path: App/Src/dac_app.c
         - path: App/Src/uart0_app.c
         - path: App/Src/rs485_app.c
+        - path: App/Src/command_app.c
         - path: App/Src/pt100_app.c
         - path: App/Src/pt100_convert.c
       folders: []
@@ -59,19 +59,9 @@ virtualFolder:
             - path: Compenents/oled/oled.c
             - path: Compenents/oled/oledfont.c
           folders: []
-        - name: sdio
-          files:
-            - path: Compenents/sdio/sdio_sdcard.c
-          folders: []
         - name: ring_buffer
           files:
             - path: Compenents/ring_buffer/ring_buffer.c
-          folders: []
-        - name: fatfs
-          files:
-            - path: Compenents/fatfs/diskio.c
-            - path: Compenents/fatfs/ff.c
-            - path: Compenents/fatfs/option/ccsbcs.c
           folders: []
     - name: Middleware
       files: []
@@ -79,34 +69,16 @@ virtualFolder:
     - name: Firmware
       files:
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_adc.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_can.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_crc.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_ctc.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dac.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dbg.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dci.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_dma.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_enet.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_exmc.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_exti.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_fmc.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_fwdgt.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_gpio.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_i2c.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_ipa.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_iref.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_misc.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_pmu.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_rcu.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_rtc.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_sdio.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_spi.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_syscfg.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_timer.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_tli.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_trng.c
         - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_usart.c
-        - path: Firmware/GD32F4xx_standard_peripheral/Source/gd32f4xx_wwdgt.c
       folders: []
     - name: Startup
       files:
@@ -133,8 +105,6 @@ targets:
         - Compenents/gd30ad3344
         - Compenents/oled
         - Compenents/gd25qxx
-        - Compenents/sdio
-        - Compenents/fatfs
         - Compenents/ring_buffer
         - Firmware/GD32F4xx_standard_peripheral/Include
         - .cmsis/include

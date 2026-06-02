@@ -14,8 +14,6 @@
 #include "rtc_app.h"
 #include "rtc_bsp.h"
 #include "scheduler.h"
-#include "sd_app.h"
-#include "systick.h"
 #include "uart0_app.h"
 #include "uart0_bsp.h"
 
@@ -40,9 +38,6 @@ void app_init(void)
 
     rtc_clock_init();
     rtc_app_init();
-
-    delay_1ms(200);
-    (void)sd_app_init();
 
     btn_app_init();
     oled_init();

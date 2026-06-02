@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "command_app.h"
 #include "rs485_bsp.h"
 
 #define RS485_PRINTF_BUF_SIZE 512
@@ -12,26 +13,38 @@
 
 static char rs485_line[RS485_LINE_BUF_SIZE];
 static uint16_t rs485_line_len;
-static rs485_line_handler_t rs485_line_handler;
+static uint8_t rs485_last_was_eol;
 
-/* 收到换行就交给用户回调，过长就丢掉当前行。 */
+static void rs485_submit_line(void)
+{
+    if (rs485_line_len == 0U)
+    {
+        return;
+    }
+
+    rs485_line[rs485_line_len] = '\0';
+    rs485_command_parse(rs485_line);
+    rs485_line_len = 0U;
+}
+
 static void rs485_process_char(uint8_t data)
 {
     if (data == '\r' || data == '\n')
     {
-        if (rs485_line_len > 0 && rs485_line_handler != 0)
+        if (rs485_last_was_eol == 0U)
         {
-            rs485_line[rs485_line_len] = '\0';
-            rs485_line_handler(rs485_line);
+            rs485_submit_line();
         }
 
-        rs485_line_len = 0;
+        rs485_last_was_eol = 1U;
         return;
     }
 
-    if (rs485_line_len >= RS485_LINE_BUF_SIZE - 1)
+    rs485_last_was_eol = 0U;
+
+    if (rs485_line_len >= RS485_LINE_BUF_SIZE - 1U)
     {
-        rs485_line_len = 0;
+        rs485_line_len = 0U;
         return;
     }
 
@@ -63,13 +76,8 @@ int rs485_printf(const char *format, ...)
 
 void rs485_app_init(void)
 {
-    rs485_line_len = 0;
-    rs485_line_handler = 0;
-}
-
-void rs485_on_line(rs485_line_handler_t handler)
-{
-    rs485_line_handler = handler;
+    rs485_line_len = 0U;
+    rs485_last_was_eol = 0U;
 }
 
 void rs485_task(void)

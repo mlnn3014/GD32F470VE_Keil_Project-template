@@ -3,32 +3,46 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "command_app.h"
+
 #define UART0_PRINTF_BUF_SIZE 512
 #define UART0_LINE_BUF_SIZE 128
 #define UART0_READ_BUF_SIZE 64
 
 static char uart0_line[UART0_LINE_BUF_SIZE];
 static uint16_t uart0_line_len;
-static uart0_line_handler_t uart0_line_handler;
+static uint8_t uart0_last_was_eol;
 
-/* 收到换行就交给用户回调，过长就丢掉当前行。 */
+static void uart0_submit_line(void)
+{
+    if (uart0_line_len == 0U)
+    {
+        return;
+    }
+
+    uart0_line[uart0_line_len] = '\0';
+    uart0_command_parse(uart0_line);
+    uart0_line_len = 0U;
+}
+
 static void uart0_process_char(uint8_t data)
 {
     if (data == '\r' || data == '\n')
     {
-        if (uart0_line_len > 0 && uart0_line_handler != 0)
+        if (uart0_last_was_eol == 0U)
         {
-            uart0_line[uart0_line_len] = '\0';
-            uart0_line_handler(uart0_line);
+            uart0_submit_line();
         }
 
-        uart0_line_len = 0;
+        uart0_last_was_eol = 1U;
         return;
     }
 
-    if (uart0_line_len >= UART0_LINE_BUF_SIZE - 1)
+    uart0_last_was_eol = 0U;
+
+    if (uart0_line_len >= UART0_LINE_BUF_SIZE - 1U)
     {
-        uart0_line_len = 0;
+        uart0_line_len = 0U;
         return;
     }
 
@@ -60,13 +74,8 @@ int uart0_printf(const char *format, ...)
 
 void uart0_app_init(void)
 {
-    uart0_line_len = 0;
-    uart0_line_handler = 0;
-}
-
-void uart0_on_line(uart0_line_handler_t handler)
-{
-    uart0_line_handler = handler;
+    uart0_line_len = 0U;
+    uart0_last_was_eol = 0U;
 }
 
 void uart0_task(void)

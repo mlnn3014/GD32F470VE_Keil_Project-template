@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,GD32F470,__PERF_COUNTER_CFG_USE_SYSTICK_WRAPPER__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Core\Inc;..\App\Inc;..\Bsp\Inc;..\Compenents\gd30ad3344;..\Compenents\oled;..\Compenents\gd25qxx;..\Compenents\sdio;..\Compenents\fatfs;..\Compenents\ring_buffer;..\Firmware\GD32F4xx_standard_peripheral\Include;..\.cmsis\include;..\Firmware\CMSIS;..\Firmware\CMSIS\GD\GD32F4xx\Include</IncludePath>
+              <IncludePath>..\Core\Inc;..\App\Inc;..\Bsp\Inc;..\Compenents\gd30ad3344;..\Compenents\oled;..\Compenents\gd25qxx;..\Compenents\ring_buffer;..\Firmware\GD32F4xx_standard_peripheral\Include;..\.cmsis\include;..\Firmware\CMSIS;..\Firmware\CMSIS\GD\GD32F4xx\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -395,11 +395,6 @@
               <FilePath>..\App\Src\adc_app.c</FilePath>
             </File>
             <File>
-              <FileName>dac_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\Src\dac_app.c</FilePath>
-            </File>
-            <File>
               <FileName>btn_app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\Src\btn_app.c</FilePath>
@@ -425,9 +420,9 @@
               <FilePath>..\App\Src\scheduler.c</FilePath>
             </File>
             <File>
-              <FileName>sd_app.c</FileName>
+              <FileName>dac_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\sd_app.c</FilePath>
+              <FilePath>..\App\Src\dac_app.c</FilePath>
             </File>
             <File>
               <FileName>uart0_app.c</FileName>
@@ -438,6 +433,11 @@
               <FileName>rs485_app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\Src\rs485_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>command_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\command_app.c</FilePath>
             </File>
             <File>
               <FileName>pt100_app.c</FileName>
@@ -567,42 +567,12 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Components/sdio</GroupName>
-          <Files>
-            <File>
-              <FileName>sdio_sdcard.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Compenents\sdio\sdio_sdcard.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Components/ring_buffer</GroupName>
           <Files>
             <File>
               <FileName>ring_buffer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Compenents\ring_buffer\ring_buffer.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Components/fatfs</GroupName>
-          <Files>
-            <File>
-              <FileName>diskio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Compenents\fatfs\diskio.c</FilePath>
-            </File>
-            <File>
-              <FileName>ff.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Compenents\fatfs\ff.c</FilePath>
-            </File>
-            <File>
-              <FileName>ccsbcs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Compenents\fatfs\option\ccsbcs.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -618,64 +588,14 @@
               <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_adc.c</FilePath>
             </File>
             <File>
-              <FileName>gd32f4xx_can.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_can.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_crc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_crc.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_ctc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_ctc.c</FilePath>
-            </File>
-            <File>
               <FileName>gd32f4xx_dac.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_dac.c</FilePath>
             </File>
             <File>
-              <FileName>gd32f4xx_dbg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_dbg.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_dci.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_dci.c</FilePath>
-            </File>
-            <File>
               <FileName>gd32f4xx_dma.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_enet.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_enet.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_exmc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_exmc.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_exti.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_exti.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_fmc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_fmc.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_fwdgt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_fwdgt.c</FilePath>
             </File>
             <File>
               <FileName>gd32f4xx_gpio.c</FileName>
@@ -686,16 +606,6 @@
               <FileName>gd32f4xx_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_i2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_ipa.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_ipa.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_iref.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_iref.c</FilePath>
             </File>
             <File>
               <FileName>gd32f4xx_misc.c</FileName>
@@ -718,44 +628,14 @@
               <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_rtc.c</FilePath>
             </File>
             <File>
-              <FileName>gd32f4xx_sdio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_sdio.c</FilePath>
-            </File>
-            <File>
               <FileName>gd32f4xx_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_spi.c</FilePath>
             </File>
             <File>
-              <FileName>gd32f4xx_syscfg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_syscfg.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_timer.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_tli.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_tli.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_trng.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_trng.c</FilePath>
-            </File>
-            <File>
               <FileName>gd32f4xx_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32f4xx_wwdgt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_wwdgt.c</FilePath>
             </File>
           </Files>
         </Group>

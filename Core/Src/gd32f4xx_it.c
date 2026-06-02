@@ -36,7 +36,6 @@ OF SUCH DAMAGE.
 #include "app.h"
 #include "systick.h"
 #include "rs485_bsp.h"
-#include "sdio_sdcard.h"
 #include "uart0_bsp.h"
 
 /*!
@@ -162,11 +161,6 @@ void USART1_IRQHandler(void)
 void DMA1_Channel7_IRQHandler(void)
 {
     uart0_tx_dma_irq_handler();
-}
-
-void SDIO_IRQHandler(void)
-{
-    sd_interrupts_process();
 }
 
 /*!

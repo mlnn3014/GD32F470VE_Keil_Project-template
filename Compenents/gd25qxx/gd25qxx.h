@@ -7,10 +7,6 @@
 extern "C" {
 #endif
 
-#ifndef FLASH_SELF_TEST_ENABLE
-#define FLASH_SELF_TEST_ENABLE 0U
-#endif
-
 #define FLASH_PAGE_SIZE   256U
 #define FLASH_SECTOR_SIZE 4096U
 
@@ -32,7 +28,6 @@ int flash_write(uint32_t addr, const uint8_t *data, uint32_t len);
 int flash_erase_sector(uint32_t addr);
 int flash_erase_chip(void);
 flash_info_t flash_get_info(void);
-int flash_self_test(uint32_t addr);
 
 #ifdef __cplusplus
 }
