@@ -10,29 +10,31 @@ extern "C"
 
 typedef enum
 {
-    PT100_STATUS_WAITING = 0,
-    PT100_STATUS_OK,
-    PT100_STATUS_SPI_ERROR,
-    PT100_STATUS_UNDER_RANGE,
-    PT100_STATUS_OVER_RANGE
+    PT100_WAIT = 0,
+    PT100_OK,
+    PT100_SPI,
+    PT100_LOW,
+    PT100_HIGH
 } pt100_status_t;
 
 typedef struct
 {
-    int16_t adc_raw;
-    int32_t adc_microvolt;
-    int32_t lead_red_microvolt;
-    int32_t pt100_microvolt;
-    int32_t resistance_milliohm;
-    int32_t temperature_centi_c;
+    int16_t raw;
+    int32_t ain0_uv;
+    int32_t lead_uv;
+    int32_t pt_uv;
+    int32_t r_mohm;
+    int32_t temp;
     pt100_status_t status;
-    uint8_t valid;
-    uint8_t reference_enabled;
+    uint8_t ok;
+    uint8_t ref_on;
 } pt100_data_t;
+
+extern pt100_data_t pt100;
 
 void pt100_app_init(void);
 void pt100_task(void);
-pt100_data_t pt100_get_data(void);
+const char *pt100_status_text(pt100_status_t status);
 
 #ifdef __cplusplus
 }

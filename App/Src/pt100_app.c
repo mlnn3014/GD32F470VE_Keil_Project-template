@@ -6,133 +6,141 @@
 #include "rs485_app.h"
 #include "systick.h"
 
-#define PT100_CH_MAIN 0
-#define PT100_CH_RED 1
-#define PT100_CH_VFORCE 2
-#define PT100_CH_COUNT 3
-#define PT100_ALL_READY 0x07
+#define CH_MAIN 0
+#define CH_RED 1
+#define CH_VFORCE 2
+#define CH_COUNT 3
+#define READY_ALL ((1U << CH_COUNT) - 1U)
 
 #define PT100_PGA GD30_PGA_2V048
 #define PT100_RATE GD30_RATE_12_5SPS
-#define PT100_REPORT_MS 1000
+#define REPORT_MS 1000U
 
-static const gd30_channel_t pt100_gd30_ch[PT100_CH_COUNT] = {
+static const gd30_channel_t gd30_ch[CH_COUNT] = {
     GD30_CH0,
     GD30_CH1,
     GD30_CH2,
 };
 
-static pt100_data_t pt100_data;
-static int16_t pt100_raw[PT100_CH_COUNT];
-static int32_t pt100_uv[PT100_CH_COUNT];
-static uint8_t pt100_ready;
-static uint8_t pt100_index;
-static uint32_t pt100_read_ms;
-static uint32_t pt100_wait_ms;
-static uint32_t pt100_report_ms;
+pt100_data_t pt100;
 
-/* 三路采样顺序：AIN0温度信号，AIN1红线补偿，AIN2激励端补偿。 */
-static uint16_t pt100_config(uint8_t index)
+static int16_t raw_buf[CH_COUNT];
+static int32_t uv_buf[CH_COUNT];
+static uint8_t ready;
+static uint8_t ch;
+static uint32_t read_ms;
+static uint32_t wait_ms;
+static uint32_t report_ms;
+
+static uint16_t make_cfg(uint8_t index)
 {
-    return gd30_make_config(pt100_gd30_ch[index], PT100_PGA, PT100_RATE);
+    return gd30_make_config(gd30_ch[index], PT100_PGA, PT100_RATE);
 }
 
-static const char *pt100_status_name(pt100_status_t status)
+const char *pt100_status_text(pt100_status_t status)
 {
     switch (status)
     {
-    case PT100_STATUS_OK:
+    case PT100_OK:
         return "OK";
-    case PT100_STATUS_SPI_ERROR:
+    case PT100_SPI:
         return "SPIERR";
-    case PT100_STATUS_UNDER_RANGE:
+    case PT100_LOW:
         return "UNDER";
-    case PT100_STATUS_OVER_RANGE:
+    case PT100_HIGH:
         return "OVER";
     default:
         return "WAIT";
     }
 }
 
-static void pt100_set_status(pt100_status_t status)
+static void set_status(pt100_status_t status)
 {
-    pt100_data.status = status;
-    pt100_data.valid = (status == PT100_STATUS_OK);
+    pt100.status = status;
+    pt100.ok = (status == PT100_OK);
 }
 
-static void pt100_reset_data(void)
+static void clear_data(void)
 {
-    for (uint8_t i = 0; i < PT100_CH_COUNT; i++)
+    for (uint8_t i = 0; i < CH_COUNT; i++)
     {
-        pt100_raw[i] = 0;
-        pt100_uv[i] = 0;
+        raw_buf[i] = 0;
+        uv_buf[i] = 0;
     }
 
-    pt100_data.adc_raw = 0;
-    pt100_data.adc_microvolt = 0;
-    pt100_data.lead_red_microvolt = 0;
-    pt100_data.pt100_microvolt = 0;
-    pt100_data.resistance_milliohm = 0;
-    pt100_data.temperature_centi_c = 0;
-    pt100_data.status = PT100_STATUS_WAITING;
-    pt100_data.valid = 0;
-    pt100_data.reference_enabled = 0;
-    pt100_ready = 0;
+    pt100.raw = 0;
+    pt100.ain0_uv = 0;
+    pt100.lead_uv = 0;
+    pt100.pt_uv = 0;
+    pt100.r_mohm = 0;
+    pt100.temp = 0;
+    pt100.status = PT100_WAIT;
+    pt100.ok = 0;
+    pt100.ref_on = 0;
+    ready = 0;
 }
 
-static void pt100_convert_data(void)
+static void calc_temp(void)
 {
     int32_t r;
-    int32_t vpt;
+    int32_t pt_uv;
     int32_t lead;
-    pt100_convert_status_t result;
+    pt100_calc_t ret;
 
-    if (pt100_ready != PT100_ALL_READY)
+    if (ready != READY_ALL)
     {
-        pt100_set_status(PT100_STATUS_WAITING);
+        set_status(PT100_WAIT);
         return;
     }
 
-    result = pt100_measurement_to_resistance_milliohm_checked(pt100_uv[PT100_CH_MAIN], pt100_uv[PT100_CH_RED], pt100_uv[PT100_CH_VFORCE], &r, &vpt, &lead);
+    ret = pt100_calc_res(uv_buf[CH_MAIN],
+                         uv_buf[CH_RED],
+                         uv_buf[CH_VFORCE],
+                         &r,
+                         &pt_uv,
+                         &lead);
 
-    pt100_data.adc_raw = pt100_raw[PT100_CH_MAIN];
-    pt100_data.adc_microvolt = pt100_uv[PT100_CH_MAIN];
-    pt100_data.lead_red_microvolt = lead;
-    pt100_data.pt100_microvolt = vpt;
-    pt100_data.resistance_milliohm = r;
-    pt100_data.temperature_centi_c = pt100_resistance_to_centi_c(r);
+    pt100.raw = raw_buf[CH_MAIN];
+    pt100.ain0_uv = uv_buf[CH_MAIN];
+    pt100.lead_uv = lead;
+    pt100.pt_uv = pt_uv;
+    pt100.r_mohm = r;
+    pt100.temp = pt100_res_to_temp(r);
 
-    if (result == PT100_CONVERT_UNDER_RANGE)
+    if (ret == PT100_CALC_LOW)
     {
-        pt100_set_status(PT100_STATUS_UNDER_RANGE);
+        set_status(PT100_LOW);
     }
-    else if (result == PT100_CONVERT_OVER_RANGE)
+    else if (ret == PT100_CALC_HIGH)
     {
-        pt100_set_status(PT100_STATUS_OVER_RANGE);
+        set_status(PT100_HIGH);
     }
     else
     {
-        pt100_set_status(PT100_STATUS_OK);
+        set_status(PT100_OK);
     }
 }
 
-static void pt100_save_sample(uint8_t index, int16_t raw)
+static void save_adc(uint8_t index, int16_t raw)
 {
-    pt100_raw[index] = raw;
-    pt100_uv[index] = gd30_sample_to_microvolt(raw, PT100_PGA);
-    pt100_ready |= (uint8_t)(1 << index);
-    pt100_convert_data();
+    raw_buf[index] = raw;
+    uv_buf[index] = gd30_sample_to_microvolt(raw, PT100_PGA);
+    ready |= (uint8_t)(1U << index);
+    calc_temp();
 }
 
-static void pt100_report(void)
+static void report_pt100(void)
 {
-    int32_t temp = pt100_data.temperature_centi_c;
+    int32_t temp = pt100.temp;
     int32_t temp_abs = (temp < 0) ? -temp : temp;
     char sign = (temp < 0) ? '-' : '+';
 
-    if (pt100_data.status != PT100_STATUS_OK)
+    if (!pt100.ok)
     {
-        rs485_printf("PT100 %s raw=%d adc=%lduV\r\n", pt100_status_name(pt100_data.status), pt100_data.adc_raw, (long)pt100_data.adc_microvolt);
+        rs485_printf("PT100 %s raw=%d adc=%lduV\r\n",
+                     pt100_status_text(pt100.status),
+                     pt100.raw,
+                     (long)pt100.ain0_uv);
         return;
     }
 
@@ -140,64 +148,59 @@ static void pt100_report(void)
                  sign,
                  (long)(temp_abs / 100),
                  (long)(temp_abs % 100),
-                 (long)((pt100_data.resistance_milliohm + 500) / 1000),
-                 (long)pt100_data.adc_microvolt,
-                 pt100_data.reference_enabled ? "ON" : "OFF");
+                 (long)((pt100.r_mohm + 500) / 1000),
+                 (long)pt100.ain0_uv,
+                 pt100.ref_on ? "ON" : "OFF");
 }
 
 void pt100_app_init(void)
 {
-    pt100_reset_data();
-    pt100_data.reference_enabled = gd30_bsp_enable_ain3_reference();
+    clear_data();
+    pt100.ref_on = gd30_bsp_enable_ain3_reference();
 
-    pt100_index = 0;
-    pt100_wait_ms = gd30_rate_wait_ms(PT100_RATE);
+    ch = 0;
+    wait_ms = gd30_rate_wait_ms(PT100_RATE);
 
-    if (gd30_bsp_configure(pt100_config(pt100_index)) == 0)
+    if (gd30_bsp_configure(make_cfg(ch)) == 0)
     {
-        pt100_set_status(PT100_STATUS_SPI_ERROR);
+        set_status(PT100_SPI);
     }
 
-    pt100_read_ms = systick_get_ms() + pt100_wait_ms;
-    pt100_report_ms = systick_get_ms() + PT100_REPORT_MS;
+    read_ms = systick_get_ms() + wait_ms;
+    report_ms = systick_get_ms() + REPORT_MS;
 }
 
 void pt100_task(void)
 {
     uint32_t now = systick_get_ms();
 
-    if ((int32_t)(now - pt100_read_ms) >= 0)
+    if ((int32_t)(now - read_ms) >= 0)
     {
         uint16_t rx;
-        uint8_t done = pt100_index;
-        uint8_t next = (uint8_t)(pt100_index + 1);
+        uint8_t done = ch;
+        uint8_t next = (uint8_t)(ch + 1U);
 
-        if (next >= PT100_CH_COUNT)
+        if (next >= CH_COUNT)
         {
             next = 0;
         }
 
-        if (gd30_transfer16(pt100_config(next), &rx) == 0)
+        if (gd30_transfer16(make_cfg(next), &rx) == 0)
         {
-            pt100_index = next;
-            pt100_save_sample(done, (int16_t)rx);
+            ch = next;
+            save_adc(done, (int16_t)rx);
         }
         else
         {
-            pt100_set_status(PT100_STATUS_SPI_ERROR);
+            set_status(PT100_SPI);
         }
 
-        pt100_read_ms = now + pt100_wait_ms;
+        read_ms = now + wait_ms;
     }
 
-    if ((int32_t)(now - pt100_report_ms) >= 0)
+    if ((int32_t)(now - report_ms) >= 0)
     {
-        pt100_report_ms = now + PT100_REPORT_MS;
-        pt100_report();
+        report_ms = now + REPORT_MS;
+        report_pt100();
     }
-}
-
-pt100_data_t pt100_get_data(void)
-{
-    return pt100_data;
 }

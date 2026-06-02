@@ -1,22 +1,22 @@
 #include "pt100_convert.h"
 
-#define PT100_ADC_MIN_UV 750000L
-#define PT100_ADC_MAX_UV 1650000L
-#define PT100_SIGNAL_GAIN_NUM 1009L
-#define PT100_SIGNAL_GAIN_DEN 100L
-#define PT100_EXCITATION_UA 999L
-#define PT100_LEAD_MIN_UV -200000L
-#define PT100_LEAD_MAX_UV 200000L
-#define PT100_SENSOR_MIN_UV 70000L
-#define PT100_SENSOR_MAX_UV 170000L
+#define ADC_MIN_UV 750000L
+#define ADC_MAX_UV 1650000L
+#define GAIN_NUM 1009L
+#define GAIN_DEN 100L
+#define I_UA 999L
+#define LEAD_MIN_UV (-200000L)
+#define LEAD_MAX_UV 200000L
+#define SENSOR_MIN_UV 70000L
+#define SENSOR_MAX_UV 170000L
 
 typedef struct
 {
-    int32_t temp_centi_c;
-    int32_t resistance_milliohm;
-} pt100_point_t;
+    int32_t temp;
+    int32_t r_mohm;
+} pt100_lut_t;
 
-static const pt100_point_t pt100_lut[] = {
+static const pt100_lut_t lut[] = {
     {-5000, 80310},
     {-4926, 80600},
     {-4447, 82500},
@@ -33,165 +33,107 @@ static const pt100_point_t pt100_lut[] = {
     {15000, 157330},
 };
 
-static int32_t pt100_limit_adc_microvolt(int32_t adc_microvolt)
+static int32_t limit_i32(int32_t x, int32_t min, int32_t max)
 {
-    if (adc_microvolt < PT100_ADC_MIN_UV)
+    if (x < min)
     {
-        return PT100_ADC_MIN_UV;
+        return min;
     }
-    if (adc_microvolt > PT100_ADC_MAX_UV)
+    if (x > max)
     {
-        return PT100_ADC_MAX_UV;
+        return max;
     }
-
-    return adc_microvolt;
+    return x;
 }
 
-int32_t pt100_adc_to_resistance_milliohm(int32_t adc_microvolt)
+static pt100_calc_t check_i32(int32_t x, int32_t min, int32_t max)
 {
-    int64_t value;
-
-    adc_microvolt = pt100_limit_adc_microvolt(adc_microvolt);
-    value = (int64_t)adc_microvolt;
-    value *= PT100_SIGNAL_GAIN_DEN;
-    value /= PT100_SIGNAL_GAIN_NUM;
-    value *= 1000LL;
-    value /= PT100_EXCITATION_UA;
-
-    if (value < 0)
+    if (x < min)
     {
-        value = 0;
+        return PT100_CALC_LOW;
     }
-
-    return (int32_t)value;
+    if (x > max)
+    {
+        return PT100_CALC_HIGH;
+    }
+    return PT100_CALC_OK;
 }
 
-pt100_convert_status_t pt100_adc_to_resistance_milliohm_checked(int32_t adc_microvolt,
-                                                                int32_t *resistance_milliohm)
+static pt100_calc_t merge_status(pt100_calc_t old, pt100_calc_t now)
 {
-    pt100_convert_status_t status = PT100_CONVERT_OK;
-
-    if (adc_microvolt < PT100_ADC_MIN_UV)
-    {
-        status = PT100_CONVERT_UNDER_RANGE;
-    }
-    else if (adc_microvolt > PT100_ADC_MAX_UV)
-    {
-        status = PT100_CONVERT_OVER_RANGE;
-    }
-
-    if (resistance_milliohm != 0)
-    {
-        *resistance_milliohm = pt100_adc_to_resistance_milliohm(adc_microvolt);
-    }
-
-    return status;
+    return (old == PT100_CALC_OK) ? now : old;
 }
 
-pt100_convert_status_t pt100_measurement_to_resistance_milliohm_checked(int32_t ain0_microvolt,
-                                                                        int32_t ain1_microvolt,
-                                                                        int32_t ain2_microvolt,
-                                                                        int32_t *resistance_milliohm,
-                                                                        int32_t *pt100_microvolt,
-                                                                        int32_t *lead_microvolt)
+pt100_calc_t pt100_calc_res(int32_t ain0_uv,
+                            int32_t ain1_uv,
+                            int32_t ain2_uv,
+                            int32_t *r_mohm,
+                            int32_t *pt_uv,
+                            int32_t *lead_uv)
 {
-    pt100_convert_status_t status = PT100_CONVERT_OK;
+    pt100_calc_t ret = check_i32(ain0_uv, ADC_MIN_UV, ADC_MAX_UV);
     int64_t sensor_uv;
-    int32_t lead_uv;
-    int64_t resistance;
+    int32_t lead;
+    int64_t r;
 
-    if (ain0_microvolt < PT100_ADC_MIN_UV)
-    {
-        status = PT100_CONVERT_UNDER_RANGE;
-    }
-    else if (ain0_microvolt > PT100_ADC_MAX_UV)
-    {
-        status = PT100_CONVERT_OVER_RANGE;
-    }
+    sensor_uv = limit_i32(ain0_uv, ADC_MIN_UV, ADC_MAX_UV);
+    sensor_uv = sensor_uv * GAIN_DEN / GAIN_NUM;
 
-    sensor_uv = (int64_t)pt100_limit_adc_microvolt(ain0_microvolt);
-    sensor_uv *= PT100_SIGNAL_GAIN_DEN;
-    sensor_uv /= PT100_SIGNAL_GAIN_NUM;
+    lead = ain2_uv - ain1_uv;
+    lead = limit_i32(lead, LEAD_MIN_UV, LEAD_MAX_UV);
+    sensor_uv -= lead;
 
-    lead_uv = ain2_microvolt - ain1_microvolt;
-    if (lead_uv < PT100_LEAD_MIN_UV)
-    {
-        lead_uv = PT100_LEAD_MIN_UV;
-    }
-    else if (lead_uv > PT100_LEAD_MAX_UV)
-    {
-        lead_uv = PT100_LEAD_MAX_UV;
-    }
-    sensor_uv -= lead_uv;
+    ret = merge_status(ret, check_i32((int32_t)sensor_uv, SENSOR_MIN_UV, SENSOR_MAX_UV));
+    sensor_uv = limit_i32((int32_t)sensor_uv, SENSOR_MIN_UV, SENSOR_MAX_UV);
 
-    if (sensor_uv < PT100_SENSOR_MIN_UV)
+    r = sensor_uv * 1000LL / I_UA;
+    if (r < 0)
     {
-        status = PT100_CONVERT_UNDER_RANGE;
-        sensor_uv = PT100_SENSOR_MIN_UV;
-    }
-    else if (sensor_uv > PT100_SENSOR_MAX_UV)
-    {
-        status = PT100_CONVERT_OVER_RANGE;
-        sensor_uv = PT100_SENSOR_MAX_UV;
+        r = 0;
     }
 
-    resistance = sensor_uv * 1000LL;
-    resistance /= PT100_EXCITATION_UA;
-
-    if (resistance < 0)
+    if (r_mohm != 0)
     {
-        resistance = 0;
+        *r_mohm = (int32_t)r;
+    }
+    if (pt_uv != 0)
+    {
+        *pt_uv = (int32_t)sensor_uv;
+    }
+    if (lead_uv != 0)
+    {
+        *lead_uv = lead;
     }
 
-    if (resistance_milliohm != 0)
-    {
-        *resistance_milliohm = (int32_t)resistance;
-    }
-    if (pt100_microvolt != 0)
-    {
-        *pt100_microvolt = (int32_t)sensor_uv;
-    }
-    if (lead_microvolt != 0)
-    {
-        *lead_microvolt = lead_uv;
-    }
-
-    return status;
+    return ret;
 }
 
-int32_t pt100_resistance_to_centi_c(int32_t resistance_milliohm)
+int32_t pt100_res_to_temp(int32_t r_mohm)
 {
-    if (resistance_milliohm <= pt100_lut[0].resistance_milliohm)
+    if (r_mohm <= lut[0].r_mohm)
     {
-        return pt100_lut[0].temp_centi_c;
+        return lut[0].temp;
     }
 
-    for (uint32_t i = 1; i < (sizeof(pt100_lut) / sizeof(pt100_lut[0])); i++)
+    for (uint32_t i = 1; i < (sizeof(lut) / sizeof(lut[0])); i++)
     {
-        const pt100_point_t *low = &pt100_lut[i - 1];
-        const pt100_point_t *high = &pt100_lut[i];
+        const pt100_lut_t *low = &lut[i - 1];
+        const pt100_lut_t *high = &lut[i];
 
-        if (resistance_milliohm <= high->resistance_milliohm)
+        if (r_mohm <= high->r_mohm)
         {
-            int64_t num = (int64_t)(resistance_milliohm - low->resistance_milliohm);
-            int32_t den = high->resistance_milliohm - low->resistance_milliohm;
-            int32_t span = high->temp_centi_c - low->temp_centi_c;
+            int64_t num = (int64_t)(r_mohm - low->r_mohm);
+            int32_t den = high->r_mohm - low->r_mohm;
+            int32_t span = high->temp - low->temp;
 
             if (den == 0)
             {
-                return low->temp_centi_c;
+                return low->temp;
             }
 
-            num *= span;
-            num /= den;
-            return (int32_t)(low->temp_centi_c + num);
+            return low->temp + (int32_t)(num * span / den);
         }
     }
 
-    return pt100_lut[(sizeof(pt100_lut) / sizeof(pt100_lut[0])) - 1].temp_centi_c;
-}
-
-int32_t pt100_adc_to_centi_c(int32_t adc_microvolt)
-{
-    return pt100_resistance_to_centi_c(pt100_adc_to_resistance_milliohm(adc_microvolt));
+    return lut[(sizeof(lut) / sizeof(lut[0])) - 1].temp;
 }

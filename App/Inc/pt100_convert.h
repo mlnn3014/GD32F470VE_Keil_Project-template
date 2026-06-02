@@ -10,22 +10,18 @@ extern "C"
 
 typedef enum
 {
-    PT100_CONVERT_OK = 0,
-    PT100_CONVERT_UNDER_RANGE,
-    PT100_CONVERT_OVER_RANGE
-} pt100_convert_status_t;
+    PT100_CALC_OK = 0,
+    PT100_CALC_LOW,
+    PT100_CALC_HIGH
+} pt100_calc_t;
 
-int32_t pt100_adc_to_resistance_milliohm(int32_t adc_microvolt);
-pt100_convert_status_t pt100_adc_to_resistance_milliohm_checked(int32_t adc_microvolt,
-                                                                int32_t *resistance_milliohm);
-pt100_convert_status_t pt100_measurement_to_resistance_milliohm_checked(int32_t ain0_microvolt,
-                                                                        int32_t ain1_microvolt,
-                                                                        int32_t ain2_microvolt,
-                                                                        int32_t *resistance_milliohm,
-                                                                        int32_t *pt100_microvolt,
-                                                                        int32_t *lead_microvolt);
-int32_t pt100_resistance_to_centi_c(int32_t resistance_milliohm);
-int32_t pt100_adc_to_centi_c(int32_t adc_microvolt);
+pt100_calc_t pt100_calc_res(int32_t ain0_uv,
+                            int32_t ain1_uv,
+                            int32_t ain2_uv,
+                            int32_t *r_mohm,
+                            int32_t *pt_uv,
+                            int32_t *lead_uv);
+int32_t pt100_res_to_temp(int32_t r_mohm);
 
 #ifdef __cplusplus
 }
