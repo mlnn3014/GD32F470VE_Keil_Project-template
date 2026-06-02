@@ -7,20 +7,10 @@
 extern "C" {
 #endif
 
-typedef struct {
-    uint32_t rx_overflow_count;
-    uint32_t tx_overflow_count;
-    uint16_t rx_available;
-    uint16_t tx_pending;
-    uint8_t tx_busy;
-} rs485_status_t;
-
 void rs485_init(void);
 uint16_t rs485_write(const uint8_t *data, uint16_t length);
 uint16_t rs485_read(uint8_t *data, uint16_t length);
 uint16_t rs485_available(void);
-rs485_status_t rs485_status(void);
-uint8_t rs485_tx_busy(void);
 void rs485_poll(void);
 void rs485_irq_handler(void);
 

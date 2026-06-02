@@ -33,7 +33,7 @@ typedef struct {
 } rtc_datetime_t;
 
 typedef enum {
-    RTC_SOURCE_NONE = 0U,
+    RTC_SOURCE_NONE = 0,
     RTC_SOURCE_LXTAL,
     RTC_SOURCE_IRC32K
 } rtc_source_t;

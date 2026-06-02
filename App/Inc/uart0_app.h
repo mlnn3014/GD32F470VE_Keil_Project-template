@@ -10,7 +10,6 @@ extern "C"
 #endif
 
 int uart0_printf(const char *format, ...);
-void uart0_app_init(void);
 void uart0_task(void);
 
 #ifdef __cplusplus

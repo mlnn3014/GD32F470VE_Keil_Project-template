@@ -16,69 +16,69 @@ static uint8_t drop_line;
 
 static void submit_line(void)
 {
-    if (len == 0U)
+    if (len == 0)
     {
         return;
     }
 
     line[len] = '\0';
     uart0_command_parse(line);
-    len = 0U;
+    len = 0;
 }
 
 static void parse_char(uint8_t data)
 {
-    if (drop_line != 0U)
+    if (drop_line != 0)
     {
-        if (got_cr != 0U)
+        if (got_cr != 0)
         {
-            got_cr = 0U;
+            got_cr = 0;
             if (data == '\n')
             {
-                drop_line = 0U;
+                drop_line = 0;
             }
             else if (data == '\r')
             {
-                got_cr = 1U;
+                got_cr = 1;
             }
         }
         else if (data == '\r')
         {
-            got_cr = 1U;
+            got_cr = 1;
         }
 
         return;
     }
 
-    if (got_cr != 0U)
+    if (got_cr != 0)
     {
-        got_cr = 0U;
+        got_cr = 0;
         if (data == '\n')
         {
             submit_line();
             return;
         }
 
-        len = 0U;
+        len = 0;
     }
 
     if (data == '\r')
     {
-        got_cr = 1U;
+        got_cr = 1;
         return;
     }
 
     if (data == '\n')
     {
-        len = 0U;
+        len = 0;
         return;
     }
 
-    if (len >= UART0_LINE_BUF_SIZE - 1U)
+    if (len >= UART0_LINE_BUF_SIZE - 1)
     {
-        len = 0U;
-        got_cr = 0U;
-        drop_line = 1U;
+        len = 0;
+        got_cr = 0;
+        drop_line = 1;
         return;
     }
 
@@ -102,17 +102,10 @@ int uart0_printf(const char *format, ...)
 
     if ((uint32_t)out_len >= sizeof(buffer))
     {
-        out_len = (int)(sizeof(buffer) - 1U);
+        out_len = (int)(sizeof(buffer) - 1);
     }
 
     return (int)uart0_write((const uint8_t *)buffer, (uint16_t)out_len);
-}
-
-void uart0_app_init(void)
-{
-    len = 0U;
-    got_cr = 0U;
-    drop_line = 0U;
 }
 
 void uart0_task(void)

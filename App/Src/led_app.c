@@ -19,11 +19,6 @@ typedef struct
 
 static led_state_t led_states[LED_COUNT];
 
-static uint8_t led_is_valid(led_id_t led)
-{
-    return ((uint32_t)led < (uint32_t)LED_COUNT);
-}
-
 static void led_blink_start(led_id_t led, uint16_t interval_ms, uint16_t cycles, uint8_t forever)
 {
     led_state_t *state = &led_states[led];
@@ -50,11 +45,6 @@ void led_app_init(void)
 
 void led_app_set(led_id_t led, uint8_t on)
 {
-    if (led_is_valid(led) == 0)
-    {
-        return;
-    }
-
     led_states[led].mode = LED_MODE_STATIC;
     led_states[led].state = (on != 0) ? 1 : 0;
     led_set(led, led_states[led].state);
@@ -62,17 +52,12 @@ void led_app_set(led_id_t led, uint8_t on)
 
 void led_app_toggle(led_id_t led)
 {
-    if (led_is_valid(led) == 0)
-    {
-        return;
-    }
-
     led_app_set(led, (uint8_t)(led_states[led].state == 0));
 }
 
 void led_app_blink_on(led_id_t led, uint16_t interval_ms)
 {
-    if ((led_is_valid(led) == 0) || (interval_ms == 0))
+    if (interval_ms == 0)
     {
         return;
     }
@@ -82,11 +67,6 @@ void led_app_blink_on(led_id_t led, uint16_t interval_ms)
 
 void led_app_blink_off(led_id_t led)
 {
-    if (led_is_valid(led) == 0)
-    {
-        return;
-    }
-
     if (led_states[led].mode != LED_MODE_BLINK)
     {
         return;
@@ -99,7 +79,7 @@ void led_app_blink_off(led_id_t led)
 
 void led_app_blink_toggle(led_id_t led, uint16_t interval_ms)
 {
-    if ((led_is_valid(led) == 0) || (interval_ms == 0))
+    if (interval_ms == 0)
     {
         return;
     }
@@ -116,7 +96,7 @@ void led_app_blink_toggle(led_id_t led, uint16_t interval_ms)
 
 void led_app_blink_times(led_id_t led, uint16_t times, uint16_t interval_ms)
 {
-    if ((led_is_valid(led) == 0) || (times == 0) || (interval_ms == 0))
+    if ((times == 0) || (interval_ms == 0))
     {
         return;
     }

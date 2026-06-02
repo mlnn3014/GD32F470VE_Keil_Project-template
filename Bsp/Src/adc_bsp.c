@@ -38,7 +38,7 @@ void adc_init(void)
     dma_init_struct.periph_addr = ADC_BSP_DATA_REG;
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_16BIT;
-    dma_init_struct.number = 1U;
+    dma_init_struct.number = 1;
     dma_init_struct.priority = DMA_PRIORITY_HIGH;
     dma_single_data_mode_init(ADC_BSP_DMA_PERIPH, ADC_BSP_DMA_CH, &dma_init_struct);
     dma_circulation_enable(ADC_BSP_DMA_PERIPH, ADC_BSP_DMA_CH);
@@ -49,14 +49,14 @@ void adc_init(void)
     adc_special_function_config(ADC_BSP_PERIPH, ADC_CONTINUOUS_MODE, ENABLE);
     adc_special_function_config(ADC_BSP_PERIPH, ADC_SCAN_MODE, DISABLE);
     adc_data_alignment_config(ADC_BSP_PERIPH, ADC_DATAALIGN_RIGHT);
-    adc_channel_length_config(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL, 1U);
-    adc_routine_channel_config(ADC_BSP_PERIPH, 0U, ADC_BSP_CHANNEL, ADC_SAMPLETIME_84);
+    adc_channel_length_config(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL, 1);
+    adc_routine_channel_config(ADC_BSP_PERIPH, 0, ADC_BSP_CHANNEL, ADC_SAMPLETIME_84);
     adc_external_trigger_config(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL, EXTERNAL_TRIGGER_DISABLE);
     adc_dma_request_after_last_enable(ADC_BSP_PERIPH);
     adc_dma_mode_enable(ADC_BSP_PERIPH);
 
     adc_enable(ADC_BSP_PERIPH);
-    delay_1ms(1U);
+    delay_1ms(1);
     adc_calibration_enable(ADC_BSP_PERIPH);
     adc_software_trigger_enable(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL);
 }

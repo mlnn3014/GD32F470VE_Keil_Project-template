@@ -8,8 +8,8 @@
 #define FLASH_PIN_SCK          GPIO_PIN_13
 #define FLASH_PIN_MISO         GPIO_PIN_14
 #define FLASH_PIN_MOSI         GPIO_PIN_15
-#define FLASH_DUMMY_BYTE       0xA5U
-#define FLASH_SPI_TIMEOUT      100000U
+#define FLASH_DUMMY_BYTE       0xA5
+#define FLASH_SPI_TIMEOUT      100000
 
 static uint8_t flash_bus_error;
 
@@ -18,13 +18,13 @@ static uint8_t flash_wait_flag(uint32_t flag, FlagStatus state)
     uint32_t timeout = FLASH_SPI_TIMEOUT;
 
     while (spi_i2s_flag_get(FLASH_SPI, flag) != state) {
-        if (--timeout == 0U) {
-            flash_bus_error = 1U;
-            return 0U;
+        if (--timeout == 0) {
+            flash_bus_error = 1;
+            return 0;
         }
     }
 
-    return 1U;
+    return 1;
 }
 
 void flash_bus_init(void)
@@ -69,19 +69,19 @@ void flash_bus_deselect(void)
 
 uint8_t flash_bus_transfer(uint8_t data)
 {
-    if (flash_wait_flag(SPI_FLAG_TBE, SET) == 0U) {
-        return 0U;
+    if (flash_wait_flag(SPI_FLAG_TBE, SET) == 0) {
+        return 0;
     }
     spi_i2s_data_transmit(FLASH_SPI, data);
-    if (flash_wait_flag(SPI_FLAG_RBNE, SET) == 0U) {
-        return 0U;
+    if (flash_wait_flag(SPI_FLAG_RBNE, SET) == 0) {
+        return 0;
     }
     return (uint8_t)spi_i2s_data_receive(FLASH_SPI);
 }
 
 void flash_bus_read(uint8_t *data, uint32_t len)
 {
-    while (len > 0U) {
+    while (len > 0) {
         *data = flash_bus_transfer(FLASH_DUMMY_BYTE);
         data++;
         len--;
@@ -90,9 +90,9 @@ void flash_bus_read(uint8_t *data, uint32_t len)
 
 void flash_bus_write(const uint8_t *data, uint32_t len)
 {
-    while (len > 0U) {
+    while (len > 0) {
         (void)flash_bus_transfer(*data);
-        if (flash_bus_ok() == 0U) {
+        if (flash_bus_ok() == 0) {
             return;
         }
         data++;
@@ -103,10 +103,10 @@ void flash_bus_write(const uint8_t *data, uint32_t len)
 
 uint8_t flash_bus_ok(void)
 {
-    return (flash_bus_error == 0U) ? 1U : 0U;
+    return (flash_bus_error == 0) ? 1 : 0;
 }
 
 void flash_bus_clear_error(void)
 {
-    flash_bus_error = 0U;
+    flash_bus_error = 0;
 }

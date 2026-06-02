@@ -3,7 +3,7 @@
 #include "gd32f4xx.h"
 #include "systick.h"
 
-/* PT100板接在SPI0：PA5=SCK，PA6=MISO，PA7=MOSI，PE8=CS。 */
+/* PT100 板接在 SPI0：PA5=SCK，PA6=MISO，PA7=MOSI，PE8=CS。 */
 #define GD30_SPI SPI0
 #define GD30_SPI_CLK RCU_SPI0
 
@@ -26,7 +26,7 @@
 #define GD30_EXTREF_WRITE_CMD 0x8100
 #define GD30_SPI_TIMEOUT 100000
 
-/* CS时序按 */
+/* CS 时序 */
 #define GD30_CS_SETUP_MS 1
 #define GD30_CS_HOLD_US 100
 #define GD30_CS_RECOVERY_MS 10
@@ -83,11 +83,6 @@ static int gd30_transfer16_word(uint16_t value, uint16_t *received)
 {
     uint8_t hi = 0;
     uint8_t lo = 0;
-
-    if (received == 0)
-    {
-        return -1;
-    }
 
     if (gd30_wait_flag(SPI_FLAG_TBE, SET) != 0)
     {
@@ -193,11 +188,6 @@ static int gd30_read_extended_register(uint16_t address, uint16_t *value)
         0,
     };
 
-    if (value == 0)
-    {
-        return -1;
-    }
-
     if (gd30_transfer16_sequence(cmd, rx, 3) != 0)
     {
         return -1;
@@ -255,11 +245,6 @@ static int gd30_read_config_register(uint16_t config, uint16_t *readback)
         0,
     };
 
-    if (readback == 0)
-    {
-        return -1;
-    }
-
     if (gd30_transfer16_sequence(tx, rx, 2) != 0)
     {
         return -1;
@@ -300,11 +285,6 @@ int gd30_transfer16(uint16_t tx, uint16_t *rx)
 {
     uint16_t received;
     int result = 0;
-
-    if (rx == 0)
-    {
-        return -1;
-    }
 
     gd30_clear_rx();
     gd30_select();

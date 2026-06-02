@@ -2,9 +2,9 @@
 
 #include "adc_bsp.h"
 
-#define ADC_REF_MV 3300U
-#define ADC_FULL_SCALE 4095U
-#define ADC_FILTER_SHIFT 4U
+#define ADC_REF_MV 3300
+#define ADC_FULL_SCALE 4095
+#define ADC_FILTER_SHIFT 4
 
 adc_data_t adc;
 static uint32_t filter_acc;
@@ -12,13 +12,13 @@ static uint32_t filter_acc;
 static uint16_t adc_to_mv(uint16_t raw)
 {
     return (uint16_t)((((uint32_t)raw * ADC_REF_MV) +
-                       (ADC_FULL_SCALE / 2U)) /
+                       (ADC_FULL_SCALE / 2)) /
                       ADC_FULL_SCALE);
 }
 
 static uint16_t adc_filter(uint16_t raw)
 {
-    if (filter_acc == 0U)
+    if (filter_acc == 0)
     {
         filter_acc = ((uint32_t)raw << ADC_FILTER_SHIFT);
     }
@@ -33,9 +33,9 @@ static uint16_t adc_filter(uint16_t raw)
 void adc_app_init(void)
 {
     adc_init();
-    filter_acc = 0U;
-    adc.raw = 0U;
-    adc.mv = 0U;
+    filter_acc = 0;
+    adc.raw = 0;
+    adc.mv = 0;
     adc_task();
 }
 

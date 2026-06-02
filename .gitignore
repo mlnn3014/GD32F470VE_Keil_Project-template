@@ -36,3 +36,6 @@ Tools/bl_host_app/dist/
 # OS files
 Thumbs.db
 Desktop.ini
+
+# Large local reference bundles
+Docs/第十九届西门子杯嵌入式赛道竞赛资料/

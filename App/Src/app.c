@@ -14,7 +14,6 @@
 #include "rtc_app.h"
 #include "rtc_bsp.h"
 #include "scheduler.h"
-#include "uart0_app.h"
 #include "uart0_bsp.h"
 
 void app_init(void)
@@ -22,10 +21,8 @@ void app_init(void)
     led_app_init();
 
     uart0_init();
-    uart0_app_init();
 
     rs485_init();
-    rs485_app_init();
 
     flash_init();
     gd30_bus_init();

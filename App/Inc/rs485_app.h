@@ -7,7 +7,6 @@ extern "C"
 #endif
 
 int rs485_printf(const char *format, ...);
-void rs485_app_init(void);
 void rs485_task(void);
 
 #ifdef __cplusplus

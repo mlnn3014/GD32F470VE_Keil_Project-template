@@ -9,8 +9,8 @@
 
 #define OLED_BSP_I2C_PERIPH       I2C0
 #define OLED_BSP_I2C_CLOCK        RCU_I2C0
-#define OLED_BSP_I2C_OWN_ADDRESS  0x72U
-#define OLED_BSP_I2C_WRITE_ADDR   0x78U
+#define OLED_BSP_I2C_OWN_ADDRESS  0x72
+#define OLED_BSP_I2C_WRITE_ADDR   0x78
 #define OLED_BSP_I2C_DATA_ADDRESS ((uint32_t)&I2C_DATA(OLED_BSP_I2C_PERIPH))
 
 #define OLED_BSP_GPIO_CLOCK       RCU_GPIOB
@@ -23,50 +23,50 @@
 #define OLED_BSP_DMA_CH           DMA_CH6
 #define OLED_BSP_DMA_SUBPERI      DMA_SUBPERI1
 
-#define OLED_BSP_OK               0U
-#define OLED_BSP_ERR              1U
-#define OLED_BSP_TIMEOUT          3U
-#define OLED_BSP_WAIT_TIMEOUT     100000U
-#define OLED_BSP_TX_BUF_SIZE      513U
+#define OLED_BSP_OK               0
+#define OLED_BSP_ERR              1
+#define OLED_BSP_TIMEOUT          3
+#define OLED_BSP_WAIT_TIMEOUT     100000
+#define OLED_BSP_TX_BUF_SIZE      513
 
 static uint8_t oled_tx_buf[OLED_BSP_TX_BUF_SIZE];
 
 static uint8_t oled_wait_i2c_flag_set(uint32_t i2c_periph, i2c_flag_enum flag, uint32_t timeout)
 {
-    while (timeout-- != 0U) {
+    while (timeout-- != 0) {
         if (i2c_flag_get(i2c_periph, flag) == SET) {
-            return 1U;
+            return 1;
         }
     }
 
-    return 0U;
+    return 0;
 }
 
 static uint8_t oled_wait_i2c_stop_clear(uint32_t i2c_periph, uint32_t timeout)
 {
-    while (timeout-- != 0U) {
-        if ((I2C_CTL0(i2c_periph) & I2C_CTL0_STOP) == 0U) {
-            return 1U;
+    while (timeout-- != 0) {
+        if ((I2C_CTL0(i2c_periph) & I2C_CTL0_STOP) == 0) {
+            return 1;
         }
     }
 
-    return 0U;
+    return 0;
 }
 
 static uint8_t oled_wait_dma_ftf(uint32_t timeout)
 {
-    while (timeout-- != 0U) {
+    while (timeout-- != 0) {
         if (dma_flag_get(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, DMA_FLAG_FTF) == SET) {
-            return 1U;
+            return 1;
         }
     }
 
-    return 0U;
+    return 0;
 }
 
 static uint8_t oled_wait_i2c_tx_complete(uint32_t timeout)
 {
-    while (timeout-- != 0U) {
+    while (timeout-- != 0) {
         if (i2c_flag_get(OLED_BSP_I2C_PERIPH, I2C_FLAG_AERR) == SET) {
             i2c_flag_clear(OLED_BSP_I2C_PERIPH, I2C_FLAG_AERR);
             return OLED_BSP_ERR;
@@ -82,18 +82,18 @@ static uint8_t oled_wait_i2c_tx_complete(uint32_t timeout)
 
 static uint8_t oled_wait_addsend_or_nack(uint32_t timeout)
 {
-    while (timeout-- != 0U) {
+    while (timeout-- != 0) {
         if (i2c_flag_get(OLED_BSP_I2C_PERIPH, I2C_FLAG_ADDSEND) == SET) {
-            return 1U;
+            return 1;
         }
 
         if (i2c_flag_get(OLED_BSP_I2C_PERIPH, I2C_FLAG_AERR) == SET) {
             i2c_flag_clear(OLED_BSP_I2C_PERIPH, I2C_FLAG_AERR);
-            return 0U;
+            return 0;
         }
     }
 
-    return 0U;
+    return 0;
 }
 
 static void oled_dma_int_disable_all(void)
@@ -132,7 +132,7 @@ static void oled_i2c_bus_reset(void)
                             OLED_BSP_SCL_PIN | OLED_BSP_SDA_PIN);
 
     gpio_bit_set(OLED_BSP_GPIO_PORT, OLED_BSP_SCL_PIN | OLED_BSP_SDA_PIN);
-    for (i = 0U; i < 9U; i++) {
+    for (i = 0; i < 9; i++) {
         gpio_bit_reset(OLED_BSP_GPIO_PORT, OLED_BSP_SCL_PIN);
         gpio_bit_set(OLED_BSP_GPIO_PORT, OLED_BSP_SCL_PIN);
     }
@@ -148,7 +148,7 @@ static void oled_i2c_bus_reset(void)
                             OLED_BSP_SDA_PIN | OLED_BSP_SCL_PIN);
 
     i2c_deinit(OLED_BSP_I2C_PERIPH);
-    i2c_clock_config(OLED_BSP_I2C_PERIPH, 400000U, I2C_DTCY_2);
+    i2c_clock_config(OLED_BSP_I2C_PERIPH, 400000, I2C_DTCY_2);
     i2c_mode_addr_config(OLED_BSP_I2C_PERIPH, I2C_I2CMODE_ENABLE,
                          I2C_ADDFORMAT_7BITS, OLED_BSP_I2C_OWN_ADDRESS);
     i2c_enable(OLED_BSP_I2C_PERIPH);
@@ -157,7 +157,7 @@ static void oled_i2c_bus_reset(void)
 
 static uint8_t oled_prepare_i2c(uint8_t addr)
 {
-    uint32_t timeout = 10000U;
+    uint32_t timeout = 10000;
 
     if (addr != OLED_BSP_I2C_WRITE_ADDR) {
         return OLED_BSP_ERR;
@@ -167,35 +167,35 @@ static uint8_t oled_prepare_i2c(uint8_t addr)
         oled_i2c_bus_reset();
     }
 
-    while ((i2c_flag_get(OLED_BSP_I2C_PERIPH, I2C_FLAG_I2CBSY) == SET) && (--timeout != 0U)) {
+    while ((i2c_flag_get(OLED_BSP_I2C_PERIPH, I2C_FLAG_I2CBSY) == SET) && (--timeout != 0)) {
     }
 
-    if (timeout == 0U) {
+    if (timeout == 0) {
         oled_i2c_bus_reset();
-        timeout = 10000U;
-        while ((i2c_flag_get(OLED_BSP_I2C_PERIPH, I2C_FLAG_I2CBSY) == SET) && (--timeout != 0U)) {
+        timeout = 10000;
+        while ((i2c_flag_get(OLED_BSP_I2C_PERIPH, I2C_FLAG_I2CBSY) == SET) && (--timeout != 0)) {
         }
-        if (timeout == 0U) {
+        if (timeout == 0) {
             return OLED_BSP_TIMEOUT;
         }
     }
 
     i2c_start_on_bus(OLED_BSP_I2C_PERIPH);
-    if (oled_wait_i2c_flag_set(OLED_BSP_I2C_PERIPH, I2C_FLAG_SBSEND, OLED_BSP_WAIT_TIMEOUT) == 0U) {
+    if (oled_wait_i2c_flag_set(OLED_BSP_I2C_PERIPH, I2C_FLAG_SBSEND, OLED_BSP_WAIT_TIMEOUT) == 0) {
         oled_i2c_bus_reset();
         return OLED_BSP_TIMEOUT;
     }
 
     i2c_master_addressing(OLED_BSP_I2C_PERIPH, addr, I2C_TRANSMITTER);
-    if (oled_wait_addsend_or_nack(OLED_BSP_WAIT_TIMEOUT) == 0U) {
+    if (oled_wait_addsend_or_nack(OLED_BSP_WAIT_TIMEOUT) == 0) {
         i2c_stop_on_bus(OLED_BSP_I2C_PERIPH);
-        (void)oled_wait_i2c_stop_clear(OLED_BSP_I2C_PERIPH, OLED_BSP_WAIT_TIMEOUT / 10U);
+        (void)oled_wait_i2c_stop_clear(OLED_BSP_I2C_PERIPH, OLED_BSP_WAIT_TIMEOUT / 10);
         oled_i2c_bus_reset();
         return OLED_BSP_ERR;
     }
 
     i2c_flag_clear(OLED_BSP_I2C_PERIPH, I2C_FLAG_ADDSEND);
-    if (oled_wait_i2c_flag_set(OLED_BSP_I2C_PERIPH, I2C_FLAG_TBE, OLED_BSP_WAIT_TIMEOUT) == 0U) {
+    if (oled_wait_i2c_flag_set(OLED_BSP_I2C_PERIPH, I2C_FLAG_TBE, OLED_BSP_WAIT_TIMEOUT) == 0) {
         oled_i2c_bus_reset();
         return OLED_BSP_TIMEOUT;
     }
@@ -211,7 +211,7 @@ static uint8_t oled_tx_finish_blocking(void)
     res = oled_wait_i2c_tx_complete(OLED_BSP_WAIT_TIMEOUT);
     i2c_stop_on_bus(OLED_BSP_I2C_PERIPH);
 
-    if (oled_wait_i2c_stop_clear(OLED_BSP_I2C_PERIPH, OLED_BSP_WAIT_TIMEOUT) == 0U) {
+    if (oled_wait_i2c_stop_clear(OLED_BSP_I2C_PERIPH, OLED_BSP_WAIT_TIMEOUT) == 0) {
         oled_i2c_bus_reset();
         return OLED_BSP_TIMEOUT;
     }
@@ -227,7 +227,7 @@ static uint8_t oled_dma_start(uint8_t control, const uint8_t *buf, uint16_t len)
 {
     uint8_t res;
 
-    if ((buf == NULL) || (len == 0U) || (len > (OLED_BSP_TX_BUF_SIZE - 1U))) {
+    if ((buf == NULL) || (len == 0) || (len > (OLED_BSP_TX_BUF_SIZE - 1))) {
         return OLED_BSP_ERR;
     }
 
@@ -246,7 +246,7 @@ static uint8_t oled_dma_start(uint8_t control, const uint8_t *buf, uint16_t len)
     dma_flag_clear(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, DMA_FLAG_FEE);
     oled_dma_int_clear_all();
     dma_memory_address_config(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, DMA_MEMORY_0, (uint32_t)oled_tx_buf);
-    dma_transfer_number_config(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, (uint32_t)len + 1U);
+    dma_transfer_number_config(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, (uint32_t)len + 1);
     i2c_dma_last_transfer_config(OLED_BSP_I2C_PERIPH, I2C_DMALST_ON);
     i2c_dma_config(OLED_BSP_I2C_PERIPH, I2C_DMA_ON);
 
@@ -271,7 +271,7 @@ uint8_t oled_bus_init(void)
                             OLED_BSP_SDA_PIN | OLED_BSP_SCL_PIN);
 
     i2c_deinit(OLED_BSP_I2C_PERIPH);
-    i2c_clock_config(OLED_BSP_I2C_PERIPH, 400000U, I2C_DTCY_2);
+    i2c_clock_config(OLED_BSP_I2C_PERIPH, 400000, I2C_DTCY_2);
     i2c_mode_addr_config(OLED_BSP_I2C_PERIPH, I2C_I2CMODE_ENABLE,
                          I2C_ADDFORMAT_7BITS, OLED_BSP_I2C_OWN_ADDRESS);
     i2c_enable(OLED_BSP_I2C_PERIPH);
@@ -285,7 +285,7 @@ uint8_t oled_bus_init(void)
     dma_init_struct.periph_addr = OLED_BSP_I2C_DATA_ADDRESS;
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
-    dma_init_struct.number = 1U;
+    dma_init_struct.number = 1;
     dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
     dma_single_data_mode_init(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, &dma_init_struct);
     dma_circulation_disable(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH);
@@ -311,10 +311,10 @@ uint8_t oled_bus_write(uint8_t control, const uint8_t *buf, uint16_t len)
         return res;
     }
 
-    if (oled_wait_dma_ftf(OLED_BSP_WAIT_TIMEOUT) == 0U) {
+    if (oled_wait_dma_ftf(OLED_BSP_WAIT_TIMEOUT) == 0) {
         oled_stop_i2c_dma();
         i2c_stop_on_bus(OLED_BSP_I2C_PERIPH);
-        (void)oled_wait_i2c_stop_clear(OLED_BSP_I2C_PERIPH, OLED_BSP_WAIT_TIMEOUT / 10U);
+        (void)oled_wait_i2c_stop_clear(OLED_BSP_I2C_PERIPH, OLED_BSP_WAIT_TIMEOUT / 10);
         oled_i2c_bus_reset();
         return OLED_BSP_TIMEOUT;
     }

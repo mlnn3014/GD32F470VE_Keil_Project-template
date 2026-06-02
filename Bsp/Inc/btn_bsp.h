@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-#define BTN_DEFAULT_DEBOUNCE_MS    20U
-#define BTN_DEFAULT_LONG_PRESS_MS  1000U
+#define BTN_DEFAULT_DEBOUNCE_MS    20
+#define BTN_DEFAULT_LONG_PRESS_MS  1000
 
 typedef enum {
     BTN_1 = 0,

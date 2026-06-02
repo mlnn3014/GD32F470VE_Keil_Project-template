@@ -10,11 +10,11 @@
 #define CH_RED 1
 #define CH_VFORCE 2
 #define CH_COUNT 3
-#define READY_ALL ((1U << CH_COUNT) - 1U)
+#define READY_ALL ((1 << CH_COUNT) - 1)
 
 #define PT100_PGA GD30_PGA_2V048
 #define PT100_RATE GD30_RATE_12_5SPS
-#define REPORT_MS 1000U
+#define REPORT_MS 1000
 
 static const gd30_channel_t gd30_ch[CH_COUNT] = {
     GD30_CH0,
@@ -125,7 +125,7 @@ static void save_adc(uint8_t index, int16_t raw)
 {
     raw_buf[index] = raw;
     uv_buf[index] = gd30_sample_to_microvolt(raw, PT100_PGA);
-    ready |= (uint8_t)(1U << index);
+    ready |= (uint8_t)(1 << index);
     calc_temp();
 }
 
@@ -178,7 +178,7 @@ void pt100_task(void)
     {
         uint16_t rx;
         uint8_t done = ch;
-        uint8_t next = (uint8_t)(ch + 1U);
+        uint8_t next = (uint8_t)(ch + 1);
 
         if (next >= CH_COUNT)
         {

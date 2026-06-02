@@ -1,16 +1,16 @@
 #include "rtc_bsp.h"
 
-#define RTC_BSP_BACKUP_VALUE    0x32F1U
-#define RTC_BSP_DEFAULT_YEAR    2025U
-#define RTC_BSP_DEFAULT_MONTH   4U
-#define RTC_BSP_DEFAULT_DAY     30U
-#define RTC_BSP_DEFAULT_WEEKDAY 6U
-#define RTC_BSP_DEFAULT_HOUR    23U
-#define RTC_BSP_DEFAULT_MINUTE  59U
-#define RTC_BSP_DEFAULT_SECOND  50U
+#define RTC_BSP_BACKUP_VALUE    0x32F1
+#define RTC_BSP_DEFAULT_YEAR    2025
+#define RTC_BSP_DEFAULT_MONTH   4
+#define RTC_BSP_DEFAULT_DAY     30
+#define RTC_BSP_DEFAULT_WEEKDAY 6
+#define RTC_BSP_DEFAULT_HOUR    23
+#define RTC_BSP_DEFAULT_MINUTE  59
+#define RTC_BSP_DEFAULT_SECOND  50
 
 #define RTC_BSP_RTCSRC_MASK     BITS(8, 9)
-#define RTC_BSP_RTCSRC_NONE     0x00000000U
+#define RTC_BSP_RTCSRC_NONE     0x00000000
 #define RTC_BSP_RTCSRC_LXTAL    RCU_RTCSRC_LXTAL
 #define RTC_BSP_RTCSRC_IRC32K   RCU_RTCSRC_IRC32K
 
@@ -21,58 +21,58 @@ static uint8_t rtc_ready;
 
 static uint8_t rtc_bcd_to_dec(uint8_t value)
 {
-    return (uint8_t)(((value >> 4U) * 10U) + (value & 0x0FU));
+    return (uint8_t)(((value >> 4) * 10) + (value & 0x0F));
 }
 
 static uint8_t rtc_dec_to_bcd(uint8_t value)
 {
-    return (uint8_t)(((value / 10U) << 4U) | (value % 10U));
+    return (uint8_t)(((value / 10) << 4) | (value % 10));
 }
 
 static uint8_t rtc_is_leap_year(uint16_t year)
 {
-    if ((year % 400U) == 0U) {
-        return 1U;
+    if ((year % 400) == 0) {
+        return 1;
     }
-    if ((year % 100U) == 0U) {
-        return 0U;
+    if ((year % 100) == 0) {
+        return 0;
     }
-    return (uint8_t)((year % 4U) == 0U);
+    return (uint8_t)((year % 4) == 0);
 }
 
 static uint8_t rtc_days_in_month(uint16_t year, uint8_t month)
 {
     static const uint8_t days[] = {
-        31U, 28U, 31U, 30U, 31U, 30U,
-        31U, 31U, 30U, 31U, 30U, 31U
+        31, 28, 31, 30, 31, 30,
+        31, 31, 30, 31, 30, 31
     };
 
-    if ((month < 1U) || (month > 12U)) {
-        return 0U;
+    if ((month < 1) || (month > 12)) {
+        return 0;
     }
-    if ((month == 2U) && (rtc_is_leap_year(year) != 0U)) {
-        return 29U;
+    if ((month == 2) && (rtc_is_leap_year(year) != 0)) {
+        return 29;
     }
-    return days[month - 1U];
+    return days[month - 1];
 }
 
 static uint8_t rtc_calc_weekday(uint16_t year, uint8_t month, uint8_t day)
 {
     static const uint8_t month_table[] = {
-        0U, 3U, 2U, 5U, 0U, 3U, 5U, 1U, 4U, 6U, 2U, 4U
+        0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4
     };
     uint16_t calc_year = year;
     uint32_t weekday;
 
-    if (month < 3U) {
+    if (month < 3) {
         calc_year--;
     }
 
-    weekday = (uint32_t)(calc_year + (calc_year / 4U) - (calc_year / 100U) +
-                         (calc_year / 400U) + month_table[month - 1U] + day);
-    weekday %= 7U;
+    weekday = (uint32_t)(calc_year + (calc_year / 4) - (calc_year / 100) +
+                         (calc_year / 400) + month_table[month - 1] + day);
+    weekday %= 7;
 
-    return (uint8_t)((weekday == 0U) ? RTC_SUNDAY : weekday);
+    return (uint8_t)((weekday == 0) ? RTC_SUNDAY : weekday);
 }
 
 static uint8_t rtc_date_valid(const rtc_date_t *date)
@@ -80,32 +80,32 @@ static uint8_t rtc_date_valid(const rtc_date_t *date)
     uint8_t month_days;
 
     if (date == 0) {
-        return 0U;
+        return 0;
     }
-    if ((date->year < 2000U) || (date->year > 2099U)) {
-        return 0U;
+    if ((date->year < 2000) || (date->year > 2099)) {
+        return 0;
     }
     month_days = rtc_days_in_month(date->year, date->month);
-    if ((date->day < 1U) || (date->day > month_days)) {
-        return 0U;
+    if ((date->day < 1) || (date->day > month_days)) {
+        return 0;
     }
     if (date->weekday > RTC_SUNDAY) {
-        return 0U;
+        return 0;
     }
 
-    return 1U;
+    return 1;
 }
 
 static uint8_t rtc_time_valid(const rtc_time_t *time)
 {
     if (time == 0) {
-        return 0U;
+        return 0;
     }
-    if ((time->hour > 23U) || (time->minute > 59U) || (time->second > 59U)) {
-        return 0U;
+    if ((time->hour > 23) || (time->minute > 59) || (time->second > 59)) {
+        return 0;
     }
 
-    return 1U;
+    return 1;
 }
 
 static void rtc_datetime_get_date(const rtc_datetime_t *datetime, rtc_date_t *date)
@@ -144,13 +144,13 @@ static uint8_t rtc_datetime_valid(const rtc_datetime_t *datetime)
     rtc_time_t time;
 
     if (datetime == 0) {
-        return 0U;
+        return 0;
     }
 
     rtc_datetime_get_date(datetime, &date);
     rtc_datetime_get_time(datetime, &time);
 
-    return (uint8_t)((rtc_date_valid(&date) != 0U) && (rtc_time_valid(&time) != 0U));
+    return (uint8_t)((rtc_date_valid(&date) != 0) && (rtc_time_valid(&time) != 0));
 }
 
 static void rtc_datetime_to_parameter(const rtc_datetime_t *datetime,
@@ -158,13 +158,13 @@ static void rtc_datetime_to_parameter(const rtc_datetime_t *datetime,
 {
     uint8_t weekday = datetime->weekday;
 
-    if (weekday == 0U) {
+    if (weekday == 0) {
         weekday = rtc_calc_weekday(datetime->year, datetime->month, datetime->day);
     }
 
     param->factor_asyn = rtc_prescaler_a;
     param->factor_syn = rtc_prescaler_s;
-    param->year = rtc_dec_to_bcd((uint8_t)(datetime->year - 2000U));
+    param->year = rtc_dec_to_bcd((uint8_t)(datetime->year - 2000));
     param->day_of_week = weekday;
     param->month = rtc_dec_to_bcd(datetime->month);
     param->date = rtc_dec_to_bcd(datetime->day);
@@ -178,7 +178,7 @@ static void rtc_datetime_to_parameter(const rtc_datetime_t *datetime,
 static void rtc_parameter_to_datetime(const rtc_parameter_struct *param,
                                       rtc_datetime_t *datetime)
 {
-    datetime->year = (uint16_t)(2000U + rtc_bcd_to_dec(param->year));
+    datetime->year = (uint16_t)(2000 + rtc_bcd_to_dec(param->year));
     datetime->month = rtc_bcd_to_dec(param->month);
     datetime->day = rtc_bcd_to_dec(param->date);
     datetime->weekday = param->day_of_week;
@@ -193,7 +193,7 @@ static int rtc_write_datetime(const rtc_datetime_t *datetime)
     uint32_t rtc_time;
     uint32_t rtc_date;
 
-    if (rtc_datetime_valid(datetime) == 0U) {
+    if (rtc_datetime_valid(datetime) == 0) {
         return -1;
     }
 
@@ -261,8 +261,8 @@ static int rtc_clock_use_lxtal(void)
 
     rcu_rtc_clock_config(RCU_RTCSRC_LXTAL);
 
-    rtc_prescaler_s = 0xFFU;
-    rtc_prescaler_a = 0x7FU;
+    rtc_prescaler_s = 0xFF;
+    rtc_prescaler_a = 0x7F;
     rtc_clock_source = RTC_SOURCE_LXTAL;
 
     return 0;
@@ -277,8 +277,8 @@ static int rtc_clock_use_irc32k(void)
 
     rcu_rtc_clock_config(RCU_RTCSRC_IRC32K);
 
-    rtc_prescaler_s = 0x13FU;
-    rtc_prescaler_a = 0x63U;
+    rtc_prescaler_s = 0x13F;
+    rtc_prescaler_a = 0x63;
     rtc_clock_source = RTC_SOURCE_IRC32K;
 
     return 0;
@@ -309,12 +309,12 @@ static int rtc_clock_resume(void)
     uint32_t source = rtc_clock_source_reg();
 
     if (source == RTC_BSP_RTCSRC_LXTAL) {
-        rtc_prescaler_s = 0xFFU;
-        rtc_prescaler_a = 0x7FU;
+        rtc_prescaler_s = 0xFF;
+        rtc_prescaler_a = 0x7F;
         rtc_clock_source = RTC_SOURCE_LXTAL;
     } else if (source == RTC_BSP_RTCSRC_IRC32K) {
-        rtc_prescaler_s = 0x13FU;
-        rtc_prescaler_a = 0x63U;
+        rtc_prescaler_s = 0x13F;
+        rtc_prescaler_a = 0x63;
         rtc_clock_source = RTC_SOURCE_IRC32K;
     } else {
         return -1;
@@ -335,7 +335,7 @@ int rtc_clock_init(void)
     rcu_periph_clock_enable(RCU_PMU);
     pmu_backup_write_enable();
 
-    rtc_ready = 0U;
+    rtc_ready = 0;
 
     if ((RTC_BKP0 == RTC_BSP_BACKUP_VALUE) &&
         (rtc_clock_source_reg() != RTC_BSP_RTCSRC_NONE)) {
@@ -353,7 +353,7 @@ int rtc_clock_init(void)
     }
 
     if (ret == 0) {
-        rtc_ready = 1U;
+        rtc_ready = 1;
     }
     rcu_all_reset_flag_clear();
 
@@ -364,7 +364,7 @@ int rtc_set_datetime(const rtc_datetime_t *datetime)
 {
     int ret;
 
-    if (rtc_ready == 0U) {
+    if (rtc_ready == 0) {
         return -1;
     }
 
@@ -380,7 +380,7 @@ int rtc_set_date(const rtc_date_t *date)
 {
     rtc_datetime_t datetime;
 
-    if (rtc_date_valid(date) == 0U) {
+    if (rtc_date_valid(date) == 0) {
         return -1;
     }
     if (rtc_read_datetime(&datetime) != 0) {
@@ -399,10 +399,10 @@ int rtc_read_date(rtc_date_t *date)
         return -1;
     }
     if (rtc_read_datetime(&datetime) != 0) {
-        date->year = 0U;
-        date->month = 0U;
-        date->day = 0U;
-        date->weekday = 0U;
+        date->year = 0;
+        date->month = 0;
+        date->day = 0;
+        date->weekday = 0;
         return -2;
     }
 
@@ -414,7 +414,7 @@ int rtc_set_time(const rtc_time_t *time)
 {
     rtc_datetime_t datetime;
 
-    if (rtc_time_valid(time) == 0U) {
+    if (rtc_time_valid(time) == 0) {
         return -1;
     }
     if (rtc_read_datetime(&datetime) != 0) {
@@ -433,9 +433,9 @@ int rtc_read_time(rtc_time_t *time)
         return -1;
     }
     if (rtc_read_datetime(&datetime) != 0) {
-        time->hour = 0U;
-        time->minute = 0U;
-        time->second = 0U;
+        time->hour = 0;
+        time->minute = 0;
+        time->second = 0;
         return -2;
     }
 
@@ -451,14 +451,14 @@ int rtc_read_datetime(rtc_datetime_t *datetime)
         return -1;
     }
 
-    if (rtc_ready == 0U) {
-        datetime->year = 0U;
-        datetime->month = 0U;
-        datetime->day = 0U;
-        datetime->weekday = 0U;
-        datetime->hour = 0U;
-        datetime->minute = 0U;
-        datetime->second = 0U;
+    if (rtc_ready == 0) {
+        datetime->year = 0;
+        datetime->month = 0;
+        datetime->day = 0;
+        datetime->weekday = 0;
+        datetime->hour = 0;
+        datetime->minute = 0;
+        datetime->second = 0;
         return -2;
     }
 
@@ -474,9 +474,9 @@ void rtc_read(rtc_time_t *time)
     }
 
     if (rtc_read_time(time) != 0) {
-        time->hour = 0U;
-        time->minute = 0U;
-        time->second = 0U;
+        time->hour = 0;
+        time->minute = 0;
+        time->second = 0;
     }
 }
 
