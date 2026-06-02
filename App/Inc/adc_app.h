@@ -10,13 +10,14 @@ extern "C"
 
 typedef struct
 {
-    uint16_t sample;
-    uint16_t millivolt;
+    uint16_t raw;
+    uint16_t mv;
 } adc_data_t;
+
+extern adc_data_t adc;
 
 void adc_app_init(void);
 void adc_task(void);
-adc_data_t adc_get_data(void);
 
 #ifdef __cplusplus
 }

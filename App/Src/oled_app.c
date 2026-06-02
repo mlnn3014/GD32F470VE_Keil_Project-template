@@ -30,9 +30,7 @@ static void oled_show_pt100(void)
 
 void oled_task(void)
 {
-    rtc_time_t time = rtc_get_time();
-
     oled_show_pt100();
-    oled_text_printf(OLED_FONT_8, OLED_ROW_TIME, 0, 0, "TIME:%02u:%02u:%02u", (unsigned)time.hour, (unsigned)time.minute, (unsigned)time.second);
+    oled_text_printf(OLED_FONT_8, OLED_ROW_TIME, 0, 0, "TIME:%02u:%02u:%02u", (unsigned)rtc.hour, (unsigned)rtc.minute, (unsigned)rtc.second);
     oled_service();
 }

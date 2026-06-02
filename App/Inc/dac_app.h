@@ -9,7 +9,7 @@ extern "C"
 #endif
 
 void dac_app_init(void);
-void dac_set_data(uint16_t millivolt);
+void dac_set_data(uint16_t mv);
 void dac_task(void);
 uint16_t dac_get_value(void);
 

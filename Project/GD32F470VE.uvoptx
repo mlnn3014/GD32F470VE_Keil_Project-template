@@ -1,7 +1,10 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <ProjectOpt xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_optx.xsd">
+
   <SchemaVersion>1.0</SchemaVersion>
+
   <Header>### uVision Project, (C) Keil Software</Header>
+
   <Extensions>
     <cExt>*.c</cExt>
     <aExt>*.s*; *.src; *.a*</aExt>
@@ -12,10 +15,12 @@
     <CppX>*.cpp; *.cc; *.cxx</CppX>
     <nMigrate>0</nMigrate>
   </Extensions>
+
   <DaveTm>
     <dwLowDateTime>0</dwLowDateTime>
     <dwHighDateTime>0</dwHighDateTime>
   </DaveTm>
+
   <Target>
     <TargetName>GD32F470VET6_Project</TargetName>
     <ToolsetNumber>0x4</ToolsetNumber>
@@ -100,26 +105,16 @@
         <bTchkAxf>0</bTchkAxf>
         <nTsel>0</nTsel>
         <sDll>
-        </sDll>
-        <sDllPa>
-        </sDllPa>
-        <sDlgDll>
-        </sDlgDll>
-        <sDlgPa>
-        </sDlgPa>
-        <sIfile>
-        </sIfile>
-        <tDll>
-        </tDll>
-        <tDllPa>
-        </tDllPa>
-        <tDlgDll>
-        </tDlgDll>
-        <tDlgPa>
-        </tDlgPa>
-        <tIfile>
-        </tIfile>
-        <pMon>BIN\UL2CM3.DLL</pMon>
+        </sDll><sDllPa>
+        </sDllPa><sDlgDll>
+        </sDlgDll><sDlgPa>
+        </sDlgPa><sIfile>
+        </sIfile><tDll>
+        </tDll><tDllPa>
+        </tDllPa><tDlgDll>
+        </tDlgDll><tDlgPa>
+        </tDlgPa><tIfile>
+        </tIfile><pMon>BIN\UL2CM3.DLL</pMon>
       </DebugOpt>
       <TargetDriverDllRegistry>
         <SetRegEntry>
@@ -128,7 +123,7 @@
           <Name>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F4xx_512KB -FS08000000 -FL080000 -FP0($$Device:GD32F470VE$Flash\GD32F4xx_512KB.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint />
+      <Breakpoint/>
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>
@@ -159,30 +154,21 @@
         <uProt>0</uProt>
       </DebugFlag>
       <LintExecutable>
-      </LintExecutable>
-      <LintConfigFile>
-      </LintConfigFile>
-      <bLintAuto>0</bLintAuto>
+      </LintExecutable><LintConfigFile>
+      </LintConfigFile><bLintAuto>0</bLintAuto>
       <bAutoGenD>0</bAutoGenD>
       <LntExFlags>0</LntExFlags>
       <pMisraName>
-      </pMisraName>
-      <pszMrule>
-      </pszMrule>
-      <pSingCmds>
-      </pSingCmds>
-      <pMultCmds>
-      </pMultCmds>
-      <pMisraNamep>
-      </pMisraNamep>
-      <pszMrulep>
-      </pszMrulep>
-      <pSingCmdsp>
-      </pSingCmdsp>
-      <pMultCmdsp>
-      </pMultCmdsp>
-    </TargetOption>
+      </pMisraName><pszMrule>
+      </pszMrule><pSingCmds>
+      </pSingCmds><pMultCmds>
+      </pMultCmds><pMisraNamep>
+      </pMisraNamep><pszMrulep>
+      </pszMrulep><pSingCmdsp>
+      </pSingCmdsp><pMultCmdsp>
+      </pMultCmdsp></TargetOption>
   </Target>
+
   <Group>
     <GroupName>App</GroupName>
     <tvExp>0</tvExp>
@@ -346,6 +332,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Core</GroupName>
     <tvExp>0</tvExp>
@@ -401,6 +388,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Bsp</GroupName>
     <tvExp>0</tvExp>
@@ -528,6 +516,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Components/gd25qxx</GroupName>
     <tvExp>0</tvExp>
@@ -547,6 +536,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Components/gd30ad3344</GroupName>
     <tvExp>0</tvExp>
@@ -566,6 +556,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Components/oled</GroupName>
     <tvExp>0</tvExp>
@@ -597,6 +588,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Components/ring_buffer</GroupName>
     <tvExp>0</tvExp>
@@ -616,6 +608,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Middleware</GroupName>
     <tvExp>0</tvExp>
@@ -623,6 +616,7 @@
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
   </Group>
+
   <Group>
     <GroupName>Firmware</GroupName>
     <tvExp>0</tvExp>
@@ -762,6 +756,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>Startup</GroupName>
     <tvExp>0</tvExp>
@@ -781,6 +776,7 @@
       <bShared>0</bShared>
     </File>
   </Group>
+
   <Group>
     <GroupName>::CMSIS</GroupName>
     <tvExp>0</tvExp>
@@ -788,4 +784,5 @@
     <cbSel>0</cbSel>
     <RteFlg>1</RteFlg>
   </Group>
+
 </ProjectOpt>

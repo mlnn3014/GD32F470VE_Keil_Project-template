@@ -10,6 +10,7 @@ virtualFolder:
   folders:
     - name: App
       files:
+        - path: App/Src/app.c
         - path: App/Src/adc_app.c
         - path: App/Src/btn_app.c
         - path: App/Src/led_app.c
