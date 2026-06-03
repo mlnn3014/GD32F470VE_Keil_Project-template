@@ -7,6 +7,7 @@
 #include "gd25qxx.h"
 #include "gd30_bsp.h"
 #include "led_app.h"
+#include "low_power_app.h"
 #include "oled.h"
 #include "ota_app.h"
 #include "ota_bsp.h"
@@ -40,6 +41,8 @@ void app_init(void)
 
     rtc_clock_init();
     rtc_app_init();
+
+    low_power_app_init();
 
     btn_app_init();
     oled_init();

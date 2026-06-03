@@ -2,6 +2,7 @@
 
 #include "btn_bsp.h"
 #include "led_app.h"
+#include "low_power_app.h"
 #include "systick.h"
 
 #define BTN_LED_BLINK_MS 100
@@ -39,6 +40,12 @@ static void btn_event(btn_id_t btn, btn_event_t event)
     if (event == BTN_EVT_CLICK)
     {
         btn_click(btn);
+        return;
+    }
+
+    if ((btn == BTN_2) && (event == BTN_EVT_LONG_PRESS))
+    {
+        low_power_app_enter();
     }
 }
 

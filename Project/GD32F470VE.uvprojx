@@ -451,6 +451,11 @@
               <FileType>1</FileType>
               <FilePath>..\App\Src\ota_app.c</FilePath>
             </File>
+            <File>
+              <FileName>low_power_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\low_power_app.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -520,6 +525,11 @@
               <FileName>oled_bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Bsp\Src\oled_bsp.c</FilePath>
+            </File>
+            <File>
+              <FileName>low_power_bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\Src\low_power_bsp.c</FilePath>
             </File>
             <File>
               <FileName>flash_bsp.c</FileName>
