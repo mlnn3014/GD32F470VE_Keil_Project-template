@@ -8,6 +8,8 @@
 #include "gd30_bsp.h"
 #include "led_app.h"
 #include "oled.h"
+#include "ota_app.h"
+#include "ota_bsp.h"
 #include "pt100_app.h"
 #include "rs485_app.h"
 #include "rs485_bsp.h"
@@ -23,6 +25,9 @@ void app_init(void)
     uart0_init();
 
     rs485_init();
+
+    ota_init();
+    ota_app_init();
 
     flash_init();
     gd30_bus_init();

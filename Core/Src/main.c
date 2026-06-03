@@ -1,11 +1,14 @@
 #include "main.h"
 
 #include "app.h"
+#include "bl_partition.h"
 #include "systick.h"
 #include "uart0_bsp.h"
 
 int main(void)
 {
+    SCB->VTOR = BL_APP1_START_ADDR;
+
     systick_config();
     app_init();
 

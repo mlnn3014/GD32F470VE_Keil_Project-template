@@ -35,6 +35,7 @@ OF SUCH DAMAGE.
 #include "gd32f4xx_it.h"
 #include "app.h"
 #include "systick.h"
+#include "ota_bsp.h"
 #include "rs485_bsp.h"
 #include "uart0_bsp.h"
 
@@ -156,6 +157,11 @@ void USART0_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
     rs485_irq_handler();
+}
+
+void USART2_IRQHandler(void)
+{
+    ota_irq_handler();
 }
 
 void DMA1_Channel7_IRQHandler(void)
