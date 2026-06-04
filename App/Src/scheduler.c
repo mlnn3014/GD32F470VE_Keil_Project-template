@@ -1,8 +1,10 @@
 #include "scheduler.h"
 
 #include "adc_app.h"
+#include "beat_app.h"
 #include "btn_app.h"
 #include "dac_app.h"
+#include "data_app.h"
 #include "oled_app.h"
 #include "ota_app.h"
 #include "pt100_app.h"
@@ -27,6 +29,8 @@ static task_t tasks[] = {
     {rtc_task, 50, 0},
     {adc_task, 100, 0},
     {dac_task, 100, 0},
+    {data_led_update, 100, 0},
+    {beat_task, 100, 0},
     {oled_task, 100, 0},
 };
 

@@ -6,7 +6,7 @@
 #define RS485_PERIPH        USART1
 #define RS485_CLOCK         RCU_USART1
 #define RS485_IRQn          USART1_IRQn
-#define RS485_BAUDRATE      115200
+#define RS485_BAUDRATE      19200
 #define RS485_DATA_REG      ((uint32_t)&USART_DATA(RS485_PERIPH))
 
 #define RS485_GPIO_CLOCK    RCU_GPIOA

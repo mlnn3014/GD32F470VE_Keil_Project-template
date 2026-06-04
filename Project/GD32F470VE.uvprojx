@@ -437,6 +437,26 @@
               <FilePath>..\App\Src\command_app.c</FilePath>
             </File>
             <File>
+              <FileName>frame_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\frame_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>data_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\data_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>time_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\time_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>beat_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\beat_app.c</FilePath>
+            </File>
+            <File>
               <FileName>pt100_app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\Src\pt100_app.c</FilePath>

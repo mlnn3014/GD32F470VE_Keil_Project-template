@@ -4,6 +4,7 @@
 #include "btn_app.h"
 #include "dac_app.h"
 #include "dac_bsp.h"
+#include "data_app.h"
 #include "gd25qxx.h"
 #include "gd30_bsp.h"
 #include "led_app.h"
@@ -22,6 +23,7 @@
 void app_init(void)
 {
     led_app_init();
+    data_app_init();
 
     uart0_init();
 
