@@ -8,7 +8,7 @@
 #include "rs485_bsp.h"
 
 #define RS485_PRINTF_BUF_SIZE 512
-#define RS485_LINE_BUF_SIZE 128
+#define RS485_LINE_BUF_SIZE 256
 #define RS485_READ_BUF_SIZE 64
 
 static char line[RS485_LINE_BUF_SIZE];

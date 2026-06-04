@@ -3,7 +3,6 @@
 #include "gd30_bsp.h"
 #include "gd30ad3344.h"
 #include "pt100_convert.h"
-#include "rs485_app.h"
 #include "systick.h"
 
 #define CH_MAIN 0
@@ -14,8 +13,6 @@
 
 #define PT100_PGA GD30_PGA_2V048
 #define PT100_RATE GD30_RATE_12_5SPS
-#define REPORT_MS 1000
-
 static const gd30_channel_t gd30_ch[CH_COUNT] = {
     GD30_CH0,
     GD30_CH1,
@@ -30,7 +27,6 @@ static uint8_t ready;
 static uint8_t ch;
 static uint32_t read_ms;
 static uint32_t wait_ms;
-static uint32_t report_ms;
 
 static uint16_t make_cfg(uint8_t index)
 {
@@ -129,30 +125,6 @@ static void save_adc(uint8_t index, int16_t raw)
     calc_temp();
 }
 
-static void report_pt100(void)
-{
-    int32_t temp = pt100.temp;
-    int32_t temp_abs = (temp < 0) ? -temp : temp;
-    char sign = (temp < 0) ? '-' : '+';
-
-    if (!pt100.ok)
-    {
-        rs485_printf("PT100 %s raw=%d adc=%lduV\r\n",
-                     pt100_status_text(pt100.status),
-                     pt100.raw,
-                     (long)pt100.ain0_uv);
-        return;
-    }
-
-    rs485_printf("PT100 %c%ld.%02ldC R=%ldohm adc=%lduV ref=%s\r\n",
-                 sign,
-                 (long)(temp_abs / 100),
-                 (long)(temp_abs % 100),
-                 (long)((pt100.r_mohm + 500) / 1000),
-                 (long)pt100.ain0_uv,
-                 pt100.ref_on ? "ON" : "OFF");
-}
-
 void pt100_app_init(void)
 {
     clear_data();
@@ -167,7 +139,6 @@ void pt100_app_init(void)
     }
 
     read_ms = systick_get_ms() + wait_ms;
-    report_ms = systick_get_ms() + REPORT_MS;
 }
 
 void pt100_task(void)
@@ -196,11 +167,5 @@ void pt100_task(void)
         }
 
         read_ms = now + wait_ms;
-    }
-
-    if ((int32_t)(now - report_ms) >= 0)
-    {
-        report_ms = now + REPORT_MS;
-        report_pt100();
     }
 }
