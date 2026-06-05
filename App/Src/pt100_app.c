@@ -2,6 +2,7 @@
 
 #include "gd30_bsp.h"
 #include "gd30ad3344.h"
+#include "oled_app.h"
 #include "pt100_convert.h"
 #include "rs485_app.h"
 #include "systick.h"
@@ -12,12 +13,14 @@
 #define PT100_REF_UV 2500000L           // 外部参考电压, uV
 #define PT100_DISCARD_SAMPLES 2         // 切换/启动后丢掉的样本数
 #define PT100_REF_RETRY 3               // reference 打开重试次数
+#define PT100_IDLE_TIMEOUT_MS 200       // 超时无新样本则切回 IDLE
 
 pt100_data_t pt100; // PT100 最新测量数据
 
 static uint32_t read_ms;       // 下一次读取时间
 static uint32_t wait_ms;       // 两次采样等待时间
 static uint32_t report_ms;     // 下一次上报时间
+static uint32_t last_sample_ms; // 上一次成功采样时间
 static uint8_t discard_count;  // 还要丢弃的样本数
 
 // 生成当前 PT100 使用的 GD30 配置
@@ -101,6 +104,9 @@ static void save_adc(int16_t raw)
     {
         set_status(PT100_OK);
     }
+
+    last_sample_ms = systick_get_ms();
+    oled_set_state(OLED_STATE_AUTOSAMPLE);
 }
 
 // 通过 RS485 打印 PT100 当前值
@@ -143,7 +149,7 @@ void pt100_app_init(void)
             break;
         }
     }
-
+ 
     wait_ms = gd30_rate_wait_ms(PT100_RATE);
 
     if (gd30_bsp_configure(make_cfg()) == 0)
@@ -181,6 +187,13 @@ void pt100_task(void)
         }
 
         read_ms = now + wait_ms;
+    }
+
+    // 超时无新样本则切回 IDLE
+    if ((oled_get_state() == OLED_STATE_AUTOSAMPLE) &&
+        ((int32_t)(now - last_sample_ms) >= PT100_IDLE_TIMEOUT_MS))
+    {
+        oled_set_state(OLED_STATE_IDLE);
     }
 
     if ((int32_t)(now - report_ms) >= 0)

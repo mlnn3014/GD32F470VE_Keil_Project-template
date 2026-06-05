@@ -4,12 +4,12 @@
 #include "systick.h"
 
 #define ADC_BSP_PERIPH      ADC0                              // 使用 ADC0
-#define ADC_BSP_CHANNEL     ADC_CHANNEL_10                    // PC0 对应通道
+#define ADC_BSP_CHANNEL     ADC_CHANNEL_10                    // PC1 对应通道
 #define ADC_BSP_DATA_REG    ((uint32_t)&ADC_RDATA(ADC_BSP_PERIPH)) // ADC 数据寄存器
 
 #define ADC_BSP_GPIO_CLOCK  RCU_GPIOC  // ADC 引脚时钟
 #define ADC_BSP_GPIO_PORT   GPIOC      // ADC 引脚端口
-#define ADC_BSP_GPIO_PIN    GPIO_PIN_0 // ADC 输入引脚
+#define ADC_BSP_GPIO_PIN    GPIO_PIN_1 // ADC 输入引脚（DAC外设跳接到PC1）
 
 #define ADC_BSP_DMA_PERIPH  DMA1       // ADC DMA 控制器
 #define ADC_BSP_DMA_CLOCK   RCU_DMA1   // ADC DMA 时钟

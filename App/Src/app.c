@@ -9,6 +9,7 @@
 #include "led_app.h"
 #include "low_power_app.h"
 #include "oled.h"
+#include "oled_app.h"
 #include "ota_app.h"
 #include "ota_bsp.h"
 #include "pt100_app.h"
@@ -48,7 +49,12 @@ void app_init(void)
     btn_app_init();
     oled_init();
 
+    oled_set_state(OLED_STATE_IDLE); // APP 启动默认为 IDLE
+
     scheduler_init();
+
+    led_app_blink_times(LED_1, 1, 500); // 闪烁1次，间隔500ms
+
 }
 
 // 主循环只跑调度器
