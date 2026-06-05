@@ -1,7 +1,10 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_projx.xsd">
+
   <SchemaVersion>2.1</SchemaVersion>
+
   <Header>### uVision Project, (C) Keil Software</Header>
+
   <Targets>
     <Target>
       <TargetName>GD32F470VET6_Project</TargetName>
@@ -16,26 +19,26 @@
           <PackID>GigaDevice.GD32F4xx_DFP.3.0.3</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x030000) IRAM2(0x10000000,0x010000) IROM(0x0800D000,0x038000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
-          <FlashUtilSpec />
-          <StartupFile />
+          <FlashUtilSpec></FlashUtilSpec>
+          <StartupFile></StartupFile>
           <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F4xx_512KB -FS08000000 -FL080000 -FP0(.\local_device\Flash\GD32F4xx_512KB.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile>..\Driver\CMSIS\GD\GD32F4xx\Include\gd32f4xx.h</RegisterFile>
-          <MemoryEnv />
-          <Cmp />
-          <Asm />
-          <Linker />
-          <OHString />
-          <InfinionOptionDll />
-          <SLE66CMisc />
-          <SLE66AMisc />
-          <SLE66LinkerMisc />
+          <MemoryEnv></MemoryEnv>
+          <Cmp></Cmp>
+          <Asm></Asm>
+          <Linker></Linker>
+          <OHString></OHString>
+          <InfinionOptionDll></InfinionOptionDll>
+          <SLE66CMisc></SLE66CMisc>
+          <SLE66AMisc></SLE66AMisc>
+          <SLE66LinkerMisc></SLE66LinkerMisc>
           <SFDFile>.\local_device\SVD\GD32F4xx.svd</SFDFile>
           <bCustSvd>1</bCustSvd>
           <UseEnv>0</UseEnv>
-          <BinPath />
-          <IncludePath />
-          <LibPath />
+          <BinPath></BinPath>
+          <IncludePath></IncludePath>
+          <LibPath></LibPath>
           <RegisterFilePath>..\Driver\CMSIS\GD\GD32F4xx\Include</RegisterFilePath>
           <DBRegisterFilePath>..\Driver\CMSIS\GD\GD32F4xx\Include</DBRegisterFilePath>
           <TargetStatus>
@@ -59,8 +62,8 @@
           <BeforeCompile>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name />
-            <UserProg2Name />
+            <UserProg1Name></UserProg1Name>
+            <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopU1X>0</nStopU1X>
@@ -69,8 +72,8 @@
           <BeforeMake>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name />
-            <UserProg2Name />
+            <UserProg1Name></UserProg1Name>
+            <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopB1X>0</nStopB1X>
@@ -79,7 +82,7 @@
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name />
+            <UserProg1Name></UserProg1Name>
             <UserProg2Name>cmd /c call .\make_app_bin.bat &amp; exit /b 0</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -87,7 +90,7 @@
             <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
-          <SVCSIdString />
+          <SVCSIdString></SVCSIdString>
         </TargetCommonOption>
         <CommonProperty>
           <UseCPPCompiler>0</UseCPPCompiler>
@@ -101,8 +104,8 @@
           <AssembleAssemblyFile>0</AssembleAssemblyFile>
           <PublicsOnly>0</PublicsOnly>
           <StopOnExitCode>3</StopOnExitCode>
-          <CustomArgument />
-          <IncludeLibraryModules />
+          <CustomArgument></CustomArgument>
+          <IncludeLibraryModules></IncludeLibraryModules>
           <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
@@ -135,11 +138,11 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3 />
-          <Flash4 />
-          <pFcarmOut />
-          <pFcarmGrp />
-          <pFcArmRoot />
+          <Flash3>"" ()</Flash3>
+          <Flash4></Flash4>
+          <pFcarmOut></pFcarmOut>
+          <pFcarmGrp></pFcarmGrp>
+          <pFcArmRoot></pFcArmRoot>
           <FcArmLst>0</FcArmLst>
         </Utilities>
         <TargetArmAds>
@@ -172,7 +175,7 @@
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M4"</AdsCpuType>
-            <RvctDeviceName />
+            <RvctDeviceName></RvctDeviceName>
             <mOS>0</mOS>
             <uocRom>0</uocRom>
             <uocRam>0</uocRam>
@@ -307,11 +310,11 @@
                 <Size>0x10000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
-            <RvctStartVector />
+            <RvctStartVector></RvctStartVector>
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -334,10 +337,10 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls />
+              <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,GD32F470,__PERF_COUNTER_CFG_USE_SYSTICK_WRAPPER__</Define>
-              <Undefine />
-              <IncludePath>..\common;..\Core\Inc;..\App\Inc;..\Bsp\Inc;..\Compenents\gd30ad3344;..\Compenents\oled;..\Compenents\gd25qxx;..\Compenents\ring_buffer;..\Firmware\GD32F4xx_standard_peripheral\Include;..\.cmsis\include;..\Firmware\CMSIS;..\Firmware\CMSIS\GD\GD32F4xx\Include</IncludePath>
+              <Undefine></Undefine>
+              <IncludePath>..\common;..\Core\Inc;..\App\Inc;..\Bsp\Inc;..\Components\gd30ad3344;..\Components\oled;..\Components\gd25qxx;..\Components\ring_buffer;..\Firmware\GD32F4xx_standard_peripheral\Include;..\.cmsis\include;..\Firmware\CMSIS;..\Firmware\CMSIS\GD\GD32F4xx\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -352,10 +355,10 @@
             <useXO>0</useXO>
             <ClangAsOpt>1</ClangAsOpt>
             <VariousControls>
-              <MiscControls />
-              <Define />
-              <Undefine />
-              <IncludePath />
+              <MiscControls></MiscControls>
+              <Define></Define>
+              <Undefine></Undefine>
+              <IncludePath></IncludePath>
             </VariousControls>
           </Aads>
           <LDads>
@@ -367,13 +370,13 @@
             <useFile>1</useFile>
             <TextAddressRange>0x0800D000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
-            <pXoBase />
+            <pXoBase></pXoBase>
             <ScatterFile>.\App_F470.sct</ScatterFile>
-            <IncludeLibs />
-            <IncludeLibsPath />
-            <Misc />
-            <LinkerInputFile />
-            <DisabledWarnings />
+            <IncludeLibs></IncludeLibs>
+            <IncludeLibsPath></IncludeLibsPath>
+            <Misc></Misc>
+            <LinkerInputFile></LinkerInputFile>
+            <DisabledWarnings></DisabledWarnings>
           </LDads>
         </TargetArmAds>
       </TargetOption>
@@ -559,7 +562,7 @@
             <File>
               <FileName>gd25qxx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Compenents\gd25qxx\gd25qxx.c</FilePath>
+              <FilePath>..\Components\gd25qxx\gd25qxx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -569,7 +572,7 @@
             <File>
               <FileName>gd30ad3344.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Compenents\gd30ad3344\gd30ad3344.c</FilePath>
+              <FilePath>..\Components\gd30ad3344\gd30ad3344.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -579,12 +582,12 @@
             <File>
               <FileName>oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Compenents\oled\oled.c</FilePath>
+              <FilePath>..\Components\oled\oled.c</FilePath>
             </File>
             <File>
               <FileName>oledfont.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Compenents\oled\oledfont.c</FilePath>
+              <FilePath>..\Components\oled\oledfont.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -594,7 +597,7 @@
             <File>
               <FileName>ring_buffer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Compenents\ring_buffer\ring_buffer.c</FilePath>
+              <FilePath>..\Components\ring_buffer\ring_buffer.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -682,18 +685,20 @@
       </Groups>
     </Target>
   </Targets>
+
   <RTE>
-    <apis />
+    <apis/>
     <components>
       <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="6.1.0" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.7.36" url="https://www.keil.com/pack/" vendor="ARM" version="6.1.0" />
+        <package name="CMSIS" schemaVersion="1.7.36" url="https://www.keil.com/pack/" vendor="ARM" version="6.1.0"/>
         <targetInfos>
-          <targetInfo name="GD32F470VET6_Project" />
+          <targetInfo name="GD32F470VET6_Project"/>
         </targetInfos>
       </component>
     </components>
-    <files />
+    <files/>
   </RTE>
+
   <LayerInfo>
     <Layers>
       <Layer>
@@ -703,4 +708,5 @@
       </Layer>
     </Layers>
   </LayerInfo>
+
 </Project>

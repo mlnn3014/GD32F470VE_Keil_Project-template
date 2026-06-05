@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-void low_power_app_init(void);
-void low_power_app_enter(void);
+void low_power_app_init(void);  // 初始化低功耗应用层
+void low_power_app_enter(void); // 进入 low power 流程
 
 #ifdef __cplusplus
 }

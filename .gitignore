@@ -2,6 +2,8 @@
 build/
 Project/output/
 Project/list/
+BootLoader/Project/output/
+BootLoader/Project/list/
 *.o
 *.d
 *.axf
@@ -32,6 +34,7 @@ Tools/bl_host_app/dist/
 *.bak
 *.tmp
 *.swp
+keil_*_comment_check.log
 
 # OS files
 Thumbs.db

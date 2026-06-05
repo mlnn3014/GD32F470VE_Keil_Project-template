@@ -3,39 +3,40 @@
 #include "gd32f4xx.h"
 #include "ring_buffer.h"
 
-#define OTA_PERIPH        USART2
+#define OTA_PERIPH        USART2 // OTA 使用 USART2
 #define OTA_CLOCK         RCU_USART2
 #define OTA_IRQn          USART2_IRQn
 #define OTA_BAUDRATE      115200
-#define OTA_DATA_REG      ((uint32_t)&USART_DATA(OTA_PERIPH))
+#define OTA_DATA_REG      ((uint32_t)&USART_DATA(OTA_PERIPH)) // USART 数据寄存器
 
-#define OTA_GPIO_CLOCK    RCU_GPIOB
+#define OTA_GPIO_CLOCK    RCU_GPIOB // OTA GPIO 时钟
 #define OTA_GPIO_PORT     GPIOB
-#define OTA_TX_PIN        GPIO_PIN_10
-#define OTA_RX_PIN        GPIO_PIN_11
+#define OTA_TX_PIN        GPIO_PIN_10 // OTA TX
+#define OTA_RX_PIN        GPIO_PIN_11 // OTA RX
 #define OTA_GPIO_AF       GPIO_AF_7
 
-#define OTA_DMA_PERIPH    DMA0
+#define OTA_DMA_PERIPH    DMA0 // OTA RX DMA
 #define OTA_DMA_CLOCK     RCU_DMA0
 #define OTA_RX_DMA_CH     DMA_CH1
 #define OTA_DMA_SUBPERIPH DMA_SUBPERI4
 
-#define OTA_RX_DMA_SIZE   1024
-#define OTA_RX_RING_SIZE  4096
+#define OTA_RX_DMA_SIZE   1024 // DMA 环形接收区
+#define OTA_RX_RING_SIZE  4096 // 软件 ring buffer
 
 #if ((OTA_RX_DMA_SIZE & (OTA_RX_DMA_SIZE - 1)) != 0)
 #error "OTA_RX_DMA_SIZE must be a power of 2"
 #endif
 
-#define OTA_RX_DMA_MASK   (OTA_RX_DMA_SIZE - 1)
+#define OTA_RX_DMA_MASK   (OTA_RX_DMA_SIZE - 1) // DMA 环形下标 mask
 
-static uint8_t ota_rx_dma_buffer[OTA_RX_DMA_SIZE];
-static volatile uint16_t ota_rx_dma_read_index;
-static volatile uint8_t ota_rx_poll_busy;
+static uint8_t ota_rx_dma_buffer[OTA_RX_DMA_SIZE]; // DMA 原始接收区
+static volatile uint16_t ota_rx_dma_read_index;    // 已搬运到 ring 的 DMA 下标
+static volatile uint8_t ota_rx_poll_busy;          // 防止 poll 重入
 
-static uint8_t ota_rx_ring_buffer[OTA_RX_RING_SIZE];
-static ring_buffer_t ota_rx_ring;
+static uint8_t ota_rx_ring_buffer[OTA_RX_RING_SIZE]; // OTA 软件接收缓存
+static ring_buffer_t ota_rx_ring;                    // OTA ring buffer 控制块
 
+// 进入临界区, 返回原 PRIMASK
 static uint32_t ota_enter_critical(void)
 {
     uint32_t primask = __get_PRIMASK();
@@ -44,6 +45,7 @@ static uint32_t ota_enter_critical(void)
     return primask;
 }
 
+// 恢复临界区前的中断状态
 static void ota_exit_critical(uint32_t primask)
 {
     if (primask == 0)
@@ -52,6 +54,7 @@ static void ota_exit_critical(uint32_t primask)
     }
 }
 
+// 计算 DMA 当前写入下标
 static uint16_t ota_rx_dma_write_index(void)
 {
     uint16_t write_index;
@@ -62,6 +65,7 @@ static uint16_t ota_rx_dma_write_index(void)
     return (uint16_t)(write_index & OTA_RX_DMA_MASK);
 }
 
+// 从 DMA buffer 搬一段数据到 ring
 static void ota_rx_copy_dma_block(uint16_t start, uint16_t length)
 {
     uint32_t primask;
@@ -77,6 +81,7 @@ static void ota_rx_copy_dma_block(uint16_t start, uint16_t length)
     ota_exit_critical(primask);
 }
 
+// 处理 DMA 环形回绕, 把新数据搬到 ring
 static void ota_rx_copy_dma_to_ring(uint16_t write_index)
 {
     uint16_t read_index = ota_rx_dma_read_index;
@@ -97,6 +102,7 @@ static void ota_rx_copy_dma_to_ring(uint16_t write_index)
     }
 }
 
+// 配置 OTA RX DMA 环形接收
 static void ota_rx_dma_config(void)
 {
     dma_single_data_parameter_struct dma_init;
@@ -117,6 +123,7 @@ static void ota_rx_dma_config(void)
     dma_channel_enable(OTA_DMA_PERIPH, OTA_RX_DMA_CH);
 }
 
+// 初始化 OTA USART 和 DMA
 void ota_init(void)
 {
     ring_buffer_init(&ota_rx_ring, ota_rx_ring_buffer, OTA_RX_RING_SIZE);
@@ -146,6 +153,7 @@ void ota_init(void)
     usart_interrupt_enable(OTA_PERIPH, USART_INT_IDLE);
 }
 
+// 从 OTA ring 读取数据
 uint16_t ota_read(uint8_t *data, uint16_t length)
 {
     uint16_t read_count;
@@ -165,6 +173,7 @@ uint16_t ota_read(uint8_t *data, uint16_t length)
     return read_count;
 }
 
+// 查询 OTA ring 可读数据量
 uint16_t ota_available(void)
 {
     uint16_t available;
@@ -178,6 +187,7 @@ uint16_t ota_available(void)
     return available;
 }
 
+// 轮询 DMA 写位置并搬运新数据
 void ota_poll(void)
 {
     uint16_t write_index;
@@ -200,6 +210,7 @@ void ota_poll(void)
     ota_exit_critical(primask);
 }
 
+// USART idle 中断里触发搬运
 void ota_irq_handler(void)
 {
     if (usart_interrupt_flag_get(OTA_PERIPH, USART_INT_FLAG_IDLE) != RESET)

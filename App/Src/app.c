@@ -19,6 +19,7 @@
 #include "scheduler.h"
 #include "uart0_bsp.h"
 
+// 各模块按依赖顺序初始化
 void app_init(void)
 {
     led_app_init();
@@ -50,11 +51,13 @@ void app_init(void)
     scheduler_init();
 }
 
+// 主循环只跑调度器
 void app_loop(void)
 {
     scheduler_run();
 }
 
+// 1ms 中断里调用的 app tick
 void app_tick_1ms(void)
 {
     led_app_blink_tick();

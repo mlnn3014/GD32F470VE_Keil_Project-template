@@ -8,32 +8,33 @@
 #include "systick.h"
 #include "uart0_app.h"
 
-#define OTA_MAGIC          BL_PARAM_MAGIC
-#define OTA_HEADER_SIZE    16U
-#define OTA_BUF_SIZE       128U
-#define OTA_PROGRESS_STEP  4096UL
+#define OTA_MAGIC          BL_PARAM_MAGIC // OTA 包头 magic
+#define OTA_HEADER_SIZE    16U            // magic + version + size + crc
+#define OTA_BUF_SIZE       128U           // 每次从串口取的数据块
+#define OTA_PROGRESS_STEP  4096UL         // 进度打印间隔
 
 typedef enum
 {
-    OTA_WAIT_MAGIC = 0,
-    OTA_RECV_HEADER,
-    OTA_RECV_BIN,
-    OTA_ERROR
+    OTA_WAIT_MAGIC = 0, // 等待 magic
+    OTA_RECV_HEADER,    // 接收 header
+    OTA_RECV_BIN,       // 接收固件数据
+    OTA_ERROR           // 出错后等待复位状态机
 } ota_state_t;
 
-static ota_state_t ota_state;
-static uint8_t ota_header[OTA_HEADER_SIZE];
-static uint8_t ota_header_len;
-static uint32_t ota_magic_shift;
+static ota_state_t ota_state;              // OTA 当前状态
+static uint8_t ota_header[OTA_HEADER_SIZE]; // OTA header 缓存
+static uint8_t ota_header_len;             // 已接收 header 长度
+static uint32_t ota_magic_shift;           // 滑动匹配 magic 用
 
-static uint32_t ota_version;
-static uint32_t ota_app_size;
-static uint32_t ota_app_crc;
-static uint32_t ota_recv_size;
-static uint32_t ota_crc_calc;
-static uint32_t ota_next_log_size;
-static uint32_t ota_erased_size;
+static uint32_t ota_version;       // OTA 包版本
+static uint32_t ota_app_size;      // app 镜像大小
+static uint32_t ota_app_crc;       // header 里的目标 CRC
+static uint32_t ota_recv_size;     // 已接收字节数
+static uint32_t ota_crc_calc;      // 边接收边计算的 CRC
+static uint32_t ota_next_log_size; // 下一次打印进度的位置
+static uint32_t ota_erased_size;   // app2 已擦除大小
 
+// 从小端 byte 流读取 uint32
 static uint32_t ota_load_u32(const uint8_t *data)
 {
     return ((uint32_t)data[0]) |
@@ -42,6 +43,7 @@ static uint32_t ota_load_u32(const uint8_t *data)
            ((uint32_t)data[3] << 24);
 }
 
+// OTA 使用标准 CRC32 逐字节更新
 static uint32_t ota_crc32_update(uint32_t crc, const uint8_t *data, uint32_t len)
 {
     for (uint32_t i = 0; i < len; i++)
@@ -63,6 +65,7 @@ static uint32_t ota_crc32_update(uint32_t crc, const uint8_t *data, uint32_t len
     return crc;
 }
 
+// 重置 OTA 状态机
 static void ota_reset_state(void)
 {
     ota_state = OTA_WAIT_MAGIC;
@@ -77,6 +80,7 @@ static void ota_reset_state(void)
     ota_erased_size = 0;
 }
 
+// 写入前按需擦除 app2 区
 static uint8_t ota_erase_app2_need(uint32_t write_addr, uint32_t write_len)
 {
     uint32_t need_size;
@@ -101,6 +105,7 @@ static uint8_t ota_erase_app2_need(uint32_t write_addr, uint32_t write_len)
     return 1;
 }
 
+// 把一段固件数据写到 app2
 static uint8_t ota_write_app2(const uint8_t *data, uint32_t len)
 {
     uint32_t write_addr = BL_APP2_START_ADDR + ota_recv_size;
@@ -118,6 +123,7 @@ static uint8_t ota_write_app2(const uint8_t *data, uint32_t len)
     return onchip_flash_write(write_addr, data, len);
 }
 
+// 写参数区, 通知 BootLoader 下次搬运
 static uint8_t ota_commit_update(void)
 {
     bl_param_t param;
@@ -134,6 +140,7 @@ static uint8_t ota_commit_update(void)
     return onchip_flash_commit_param(&param);
 }
 
+// header 收齐后检查 size 并进入接收 bin
 static void ota_header_ok(void)
 {
     ota_version = ota_load_u32(&ota_header[4]);
@@ -157,6 +164,7 @@ static void ota_header_ok(void)
     ota_state = OTA_RECV_BIN;
 }
 
+// 滑动查找 OTA magic
 static void ota_parse_magic(uint8_t data)
 {
     ota_magic_shift = (ota_magic_shift >> 8) | ((uint32_t)data << 24);
@@ -173,6 +181,7 @@ static void ota_parse_magic(uint8_t data)
     }
 }
 
+// 接收固定长度 header
 static void ota_parse_header(uint8_t data)
 {
     ota_header[ota_header_len++] = data;
@@ -183,6 +192,7 @@ static void ota_parse_header(uint8_t data)
     }
 }
 
+// 固件接收完成, 校验 CRC 并复位
 static void ota_finish(void)
 {
     uint32_t crc = ota_crc_calc ^ 0xFFFFFFFFUL;
@@ -208,6 +218,7 @@ static void ota_finish(void)
     NVIC_SystemReset();
 }
 
+// 处理固件正文数据
 static void ota_parse_bin(const uint8_t *data, uint32_t len)
 {
     uint32_t left;
@@ -248,11 +259,13 @@ static void ota_parse_bin(const uint8_t *data, uint32_t len)
     }
 }
 
+// 初始化 OTA 状态机
 void ota_app_init(void)
 {
     ota_reset_state();
 }
 
+// 从 OTA 串口取数据并喂给状态机
 void ota_task(void)
 {
     uint8_t buf[OTA_BUF_SIZE];

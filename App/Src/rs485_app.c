@@ -7,15 +7,14 @@
 #include "command_app.h"
 #include "rs485_bsp.h"
 
-#define RS485_PRINTF_BUF_SIZE 512
-#define RS485_LINE_BUF_SIZE 128
-#define RS485_READ_BUF_SIZE 64
+#define RS485_PRINTF_BUF_SIZE 512 // printf 临时 buffer
+#define RS485_LINE_BUF_SIZE 128   // 命令行 buffer
+#define RS485_READ_BUF_SIZE 64    // 单次读取 buffer
 
-static char line[RS485_LINE_BUF_SIZE];
-static uint16_t len;
-static uint8_t got_cr;
-static uint8_t drop_line;
+static char line[RS485_LINE_BUF_SIZE]; // 当前命令行
+static uint16_t len;                   // 当前命令长度
 
+// 收到一整行后交给命令解析
 static void submit_line(void)
 {
     if (len == 0)
@@ -28,50 +27,12 @@ static void submit_line(void)
     len = 0;
 }
 
+// 把串口字节拼成命令行
 static void parse_char(uint8_t data)
 {
-    if (drop_line != 0)
+    if ((data == '\r') || (data == '\n'))
     {
-        if (got_cr != 0)
-        {
-            got_cr = 0;
-            if (data == '\n')
-            {
-                drop_line = 0;
-            }
-            else if (data == '\r')
-            {
-                got_cr = 1;
-            }
-        }
-        else if (data == '\r')
-        {
-            got_cr = 1;
-        }
-
-        return;
-    }
-
-    if (got_cr != 0)
-    {
-        got_cr = 0;
-        if (data == '\n')
-        {
-            submit_line();
-            return;
-        }
-
-        len = 0;
-    }
-
-    if (data == '\r')
-    {
-        got_cr = 1;
-        return;
-    }
-
-    if (data == '\n')
-    {
+        submit_line();
         len = 0;
         return;
     }
@@ -79,14 +40,13 @@ static void parse_char(uint8_t data)
     if (len >= RS485_LINE_BUF_SIZE - 1)
     {
         len = 0;
-        got_cr = 0;
-        drop_line = 1;
         return;
     }
 
     line[len++] = (char)data;
 }
 
+// RS485 printf 封装
 int rs485_printf(const char *format, ...)
 {
     char buffer[RS485_PRINTF_BUF_SIZE];
@@ -110,6 +70,7 @@ int rs485_printf(const char *format, ...)
     return (int)rs485_write((const uint8_t *)buffer, (uint16_t)out_len);
 }
 
+// 读取 RS485 数据并解析命令
 void rs485_task(void)
 {
     uint8_t buf[RS485_READ_BUF_SIZE];

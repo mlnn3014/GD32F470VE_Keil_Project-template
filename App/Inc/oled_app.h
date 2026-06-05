@@ -6,7 +6,7 @@ extern "C"
 {
 #endif
 
-void oled_task(void);
+void oled_task(void); // OLED 页面刷新任务
 
 #ifdef __cplusplus
 }

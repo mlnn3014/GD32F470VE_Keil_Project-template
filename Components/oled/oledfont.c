@@ -1,9 +1,7 @@
 ﻿#include <stdint.h>
 
-// Commonly use ASCII tables
-// The offset is 32
-// the ASCII character set
-// The offset is 32
+// OLED 字库表, 显示函数按索引取点阵
+// ASCII 字符从空格开始, offset = 32
 /*************************6*8ASCII*************************/
 const uint8_t F6X8[][6] =
 {

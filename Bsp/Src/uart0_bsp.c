@@ -3,47 +3,48 @@
 #include "gd32f4xx.h"
 #include "ring_buffer.h"
 
-#define UART0_BSP_PERIPH        USART0
+#define UART0_BSP_PERIPH        USART0 // 调试串口 USART0
 #define UART0_BSP_CLOCK         RCU_USART0
 #define UART0_BSP_IRQn          USART0_IRQn
 #define UART0_BSP_BAUDRATE      115200
-#define UART0_BSP_DATA_REG      ((uint32_t)&USART_DATA(UART0_BSP_PERIPH))
+#define UART0_BSP_DATA_REG      ((uint32_t)&USART_DATA(UART0_BSP_PERIPH)) // USART 数据寄存器
 
 #define UART0_BSP_GPIO_CLOCK    RCU_GPIOA
 #define UART0_BSP_GPIO_PORT     GPIOA
-#define UART0_BSP_TX_PIN        GPIO_PIN_9
-#define UART0_BSP_RX_PIN        GPIO_PIN_10
+#define UART0_BSP_TX_PIN        GPIO_PIN_9  // UART0 TX
+#define UART0_BSP_RX_PIN        GPIO_PIN_10 // UART0 RX
 #define UART0_BSP_GPIO_AF       GPIO_AF_7
 
-#define UART0_BSP_DMA_PERIPH    DMA1
+#define UART0_BSP_DMA_PERIPH    DMA1 // UART0 DMA 控制器
 #define UART0_BSP_DMA_CLOCK     RCU_DMA1
 #define UART0_BSP_RX_DMA_CH     DMA_CH2
 #define UART0_BSP_TX_DMA_CH     DMA_CH7
 #define UART0_BSP_TX_DMA_IRQn   DMA1_Channel7_IRQn
 #define UART0_BSP_DMA_SUBPERIPH DMA_SUBPERI4
 
-#define UART0_BSP_RX_DMA_SIZE   512
-#define UART0_BSP_RX_RING_SIZE  2048
-#define UART0_BSP_TX_RING_SIZE  2048
+#define UART0_BSP_RX_DMA_SIZE   512  // RX DMA 环形接收区
+#define UART0_BSP_RX_RING_SIZE  2048 // RX 软件 ring
+#define UART0_BSP_TX_RING_SIZE  2048 // TX 软件 ring
 
 #if ((UART0_BSP_RX_DMA_SIZE & (UART0_BSP_RX_DMA_SIZE - 1)) != 0)
 #error "UART0_BSP_RX_DMA_SIZE must be a power of 2"
 #endif
 
-#define UART0_BSP_RX_DMA_MASK   (UART0_BSP_RX_DMA_SIZE - 1)
+#define UART0_BSP_RX_DMA_MASK   (UART0_BSP_RX_DMA_SIZE - 1) // RX DMA 下标 mask
 
-static uint8_t uart0_rx_dma_buffer[UART0_BSP_RX_DMA_SIZE];
-static volatile uint16_t uart0_rx_dma_read_index;
-static volatile uint8_t uart0_rx_poll_busy;
+static uint8_t uart0_rx_dma_buffer[UART0_BSP_RX_DMA_SIZE]; // DMA 原始接收区
+static volatile uint16_t uart0_rx_dma_read_index;          // 已搬运到 ring 的 DMA 下标
+static volatile uint8_t uart0_rx_poll_busy;                // 防止 poll 重入
 
-static uint8_t uart0_rx_ring_buffer[UART0_BSP_RX_RING_SIZE];
-static ring_buffer_t uart0_rx_ring;
+static uint8_t uart0_rx_ring_buffer[UART0_BSP_RX_RING_SIZE]; // RX ring 存储区
+static ring_buffer_t uart0_rx_ring;                          // RX ring 控制块
 
-static uint8_t uart0_tx_ring_buffer[UART0_BSP_TX_RING_SIZE];
-static ring_buffer_t uart0_tx_ring;
-static volatile uint16_t uart0_tx_dma_length;
-static volatile uint8_t uart0_tx_dma_busy;
+static uint8_t uart0_tx_ring_buffer[UART0_BSP_TX_RING_SIZE]; // TX ring 存储区
+static ring_buffer_t uart0_tx_ring;                          // TX ring 控制块
+static volatile uint16_t uart0_tx_dma_length;                // 本次 DMA 发送长度
+static volatile uint8_t uart0_tx_dma_busy;                   // TX DMA busy 标志
 
+// 进入临界区
 static uint32_t uart0_enter_critical(void)
 {
     uint32_t primask = __get_PRIMASK();
@@ -52,6 +53,7 @@ static uint32_t uart0_enter_critical(void)
     return primask;
 }
 
+// 恢复临界区前的中断状态
 static void uart0_exit_critical(uint32_t primask)
 {
     if (primask == 0) {
@@ -59,6 +61,7 @@ static void uart0_exit_critical(uint32_t primask)
     }
 }
 
+// 计算 RX DMA 当前写入下标
 static uint16_t uart0_rx_dma_write_index(void)
 {
     uint16_t write_index;
@@ -69,6 +72,7 @@ static uint16_t uart0_rx_dma_write_index(void)
     return (uint16_t)(write_index & UART0_BSP_RX_DMA_MASK);
 }
 
+// 往 RX ring 写一段数据, 调用者已进临界区
 static void uart0_rx_push_block_locked(const uint8_t *data, uint16_t length)
 {
     if ((data == 0) || (length == 0)) {
@@ -78,6 +82,7 @@ static void uart0_rx_push_block_locked(const uint8_t *data, uint16_t length)
     (void)ring_buffer_write(&uart0_rx_ring, data, length);
 }
 
+// 从 DMA buffer 搬一段到 RX ring
 static void uart0_rx_copy_dma_block(uint16_t start, uint16_t length)
 {
     uint32_t primask;
@@ -92,6 +97,7 @@ static void uart0_rx_copy_dma_block(uint16_t start, uint16_t length)
     uart0_exit_critical(primask);
 }
 
+// 处理 RX DMA 环形回绕
 static void uart0_rx_copy_dma_to_ring(uint16_t write_index)
 {
     uint16_t read_index = uart0_rx_dma_read_index;
@@ -108,6 +114,7 @@ static void uart0_rx_copy_dma_to_ring(uint16_t write_index)
     }
 }
 
+// 配置 UART0 RX DMA
 static void uart0_rx_dma_config(void)
 {
     dma_single_data_parameter_struct dma_init;
@@ -129,6 +136,7 @@ static void uart0_rx_dma_config(void)
     dma_channel_enable(UART0_BSP_DMA_PERIPH, UART0_BSP_RX_DMA_CH);
 }
 
+// 配置 UART0 TX DMA
 static void uart0_tx_dma_config(void)
 {
     dma_single_data_parameter_struct dma_init;
@@ -150,6 +158,7 @@ static void uart0_tx_dma_config(void)
     dma_interrupt_enable(UART0_BSP_DMA_PERIPH, UART0_BSP_TX_DMA_CH, DMA_INT_FTF);
 }
 
+// 如果 TX 空闲, 启动一段连续数据 DMA
 static void uart0_tx_start_dma(void)
 {
     uint16_t length;
@@ -172,6 +181,7 @@ static void uart0_tx_start_dma(void)
     dma_channel_enable(UART0_BSP_DMA_PERIPH, UART0_BSP_TX_DMA_CH);
 }
 
+// 一段 DMA 发完后丢弃并尝试继续发
 static void uart0_tx_finish_dma(void)
 {
     uint16_t length = uart0_tx_dma_length;
@@ -183,6 +193,7 @@ static void uart0_tx_finish_dma(void)
     uart0_tx_start_dma();
 }
 
+// 写入 TX ring 并启动 DMA
 static uint16_t uart0_tx_write_buffer(const uint8_t *data, uint16_t length)
 {
     uint16_t written;
@@ -196,6 +207,7 @@ static uint16_t uart0_tx_write_buffer(const uint8_t *data, uint16_t length)
     return written;
 }
 
+// 初始化 UART0 + DMA
 void uart0_init(void)
 {
     ring_buffer_init(&uart0_rx_ring, uart0_rx_ring_buffer, UART0_BSP_RX_RING_SIZE);
@@ -228,6 +240,7 @@ void uart0_init(void)
     usart_interrupt_enable(UART0_BSP_PERIPH, USART_INT_IDLE);
 }
 
+// 写 UART0 数据
 uint16_t uart0_write(const uint8_t *data, uint16_t length)
 {
     if ((data == 0) || (length == 0)) {
@@ -237,6 +250,7 @@ uint16_t uart0_write(const uint8_t *data, uint16_t length)
     return uart0_tx_write_buffer(data, length);
 }
 
+// 读 UART0 数据
 uint16_t uart0_read(uint8_t *data, uint16_t length)
 {
     uint16_t read_count = 0;
@@ -255,6 +269,7 @@ uint16_t uart0_read(uint8_t *data, uint16_t length)
     return read_count;
 }
 
+// 查询 UART0 可读数量
 uint16_t uart0_available(void)
 {
     uint16_t available;
@@ -268,6 +283,7 @@ uint16_t uart0_available(void)
     return available;
 }
 
+// 轮询 DMA 写位置并搬运新数据
 void uart0_poll(void)
 {
     uint16_t write_index;
@@ -289,6 +305,7 @@ void uart0_poll(void)
     uart0_exit_critical(primask);
 }
 
+// UART0 idle 中断处理
 void uart0_irq_handler(void)
 {
     if (usart_interrupt_flag_get(UART0_BSP_PERIPH, USART_INT_FLAG_IDLE) != RESET) {
@@ -297,6 +314,7 @@ void uart0_irq_handler(void)
     }
 }
 
+// UART0 TX DMA 完成中断处理
 void uart0_tx_dma_irq_handler(void)
 {
     if (dma_interrupt_flag_get(UART0_BSP_DMA_PERIPH, UART0_BSP_TX_DMA_CH,

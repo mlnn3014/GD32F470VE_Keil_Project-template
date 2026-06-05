@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void low_power_enter_deepsleep(void);
+void low_power_enter_deepsleep(void); // 进入 deep-sleep 低功耗
 
 #ifdef __cplusplus
 }

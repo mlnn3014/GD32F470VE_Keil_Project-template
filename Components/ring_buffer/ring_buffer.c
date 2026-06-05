@@ -2,11 +2,13 @@
 
 #include <string.h>
 
+// size 必须是 2 的幂, 方便用 mask 回绕
 static uint8_t ring_buffer_size_valid(uint16_t size)
 {
     return ((size != 0U) && ((size & (uint16_t)(size - 1U)) == 0U)) ? 1U : 0U;
 }
 
+// 检查 ring 控制块是否可用
 static uint8_t ring_buffer_valid(const ring_buffer_t *ring)
 {
     if ((ring == 0) || (ring->buf == 0) || (ring->size == 0U) ||
@@ -17,6 +19,7 @@ static uint8_t ring_buffer_valid(const ring_buffer_t *ring)
     return 1U;
 }
 
+// 初始化 ring buffer, size 非法时保持为空
 void ring_buffer_init(ring_buffer_t *ring, uint8_t *buf, uint16_t size)
 {
     if (ring == 0) {
@@ -39,6 +42,7 @@ void ring_buffer_init(ring_buffer_t *ring, uint8_t *buf, uint16_t size)
     ring->mask = (uint16_t)(size - 1U);
 }
 
+// 清空 ring 内容
 void ring_buffer_reset(ring_buffer_t *ring)
 {
     if (ring_buffer_valid(ring) == 0U) {
@@ -50,6 +54,7 @@ void ring_buffer_reset(ring_buffer_t *ring)
     ring->count = 0U;
 }
 
+// 写入数据, 空间不够就只写能放下的部分
 uint16_t ring_buffer_write(ring_buffer_t *ring, const uint8_t *data, uint16_t len)
 {
     uint16_t write_count;
@@ -84,6 +89,7 @@ uint16_t ring_buffer_write(ring_buffer_t *ring, const uint8_t *data, uint16_t le
     return write_count;
 }
 
+// 读取数据, 不够就只读已有部分
 uint16_t ring_buffer_read(ring_buffer_t *ring, uint8_t *data, uint16_t len)
 {
     uint16_t read_count;
@@ -116,6 +122,7 @@ uint16_t ring_buffer_read(ring_buffer_t *ring, uint8_t *data, uint16_t len)
     return read_count;
 }
 
+// 返回可读字节数
 uint16_t ring_buffer_available(const ring_buffer_t *ring)
 {
     if (ring_buffer_valid(ring) == 0U) {
@@ -125,6 +132,7 @@ uint16_t ring_buffer_available(const ring_buffer_t *ring)
     return ring->count;
 }
 
+// 返回剩余空间
 uint16_t ring_buffer_free(const ring_buffer_t *ring)
 {
     if (ring_buffer_valid(ring) == 0U) {
@@ -134,6 +142,7 @@ uint16_t ring_buffer_free(const ring_buffer_t *ring)
     return (uint16_t)(ring->size - ring->count);
 }
 
+// 判断 ring 是否满
 uint8_t ring_buffer_is_full(const ring_buffer_t *ring)
 {
     if (ring_buffer_valid(ring) == 0U) {
@@ -143,6 +152,7 @@ uint8_t ring_buffer_is_full(const ring_buffer_t *ring)
     return (ring->count >= ring->size) ? 1U : 0U;
 }
 
+// 判断 ring 是否空
 uint8_t ring_buffer_is_empty(const ring_buffer_t *ring)
 {
     if (ring_buffer_valid(ring) == 0U) {
@@ -152,6 +162,7 @@ uint8_t ring_buffer_is_empty(const ring_buffer_t *ring)
     return (ring->count == 0U) ? 1U : 0U;
 }
 
+// 返回当前连续可读区域指针
 const uint8_t *ring_buffer_read_ptr(const ring_buffer_t *ring)
 {
     if ((ring_buffer_valid(ring) == 0U) || (ring->count == 0U)) {
@@ -161,6 +172,7 @@ const uint8_t *ring_buffer_read_ptr(const ring_buffer_t *ring)
     return &ring->buf[ring->read];
 }
 
+// 返回当前连续可读长度
 uint16_t ring_buffer_read_linear(const ring_buffer_t *ring)
 {
     uint16_t len;
@@ -177,6 +189,7 @@ uint16_t ring_buffer_read_linear(const ring_buffer_t *ring)
     return len;
 }
 
+// 丢弃指定长度数据
 void ring_buffer_drop(ring_buffer_t *ring, uint16_t len)
 {
     if ((ring_buffer_valid(ring) == 0U) || (len == 0U)) {

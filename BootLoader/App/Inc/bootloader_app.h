@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void bootloader_run(void);
+void bootloader_run(void); // BootLoader 主流程
 
 #ifdef __cplusplus
 }

@@ -6,37 +6,27 @@
 #include "rs485_app.h"
 #include "systick.h"
 
-#define CH_MAIN 0
-#define CH_RED 1
-#define CH_VFORCE 2
-#define CH_COUNT 3
-#define READY_ALL ((1 << CH_COUNT) - 1)
+#define PT100_PGA GD30_PGA_2V048        // PT100 ADC PGA 档位
+#define PT100_RATE GD30_RATE_12_5SPS    // PT100 采样率
+#define REPORT_MS 1000                  // 上报间隔
+#define PT100_REF_UV 2500000L           // 外部参考电压, uV
+#define PT100_DISCARD_SAMPLES 2         // 切换/启动后丢掉的样本数
+#define PT100_REF_RETRY 3               // reference 打开重试次数
 
-#define PT100_PGA GD30_PGA_2V048
-#define PT100_RATE GD30_RATE_12_5SPS
-#define REPORT_MS 1000
+pt100_data_t pt100; // PT100 最新测量数据
 
-static const gd30_channel_t gd30_ch[CH_COUNT] = {
-    GD30_CH0,
-    GD30_CH1,
-    GD30_CH2,
-};
+static uint32_t read_ms;       // 下一次读取时间
+static uint32_t wait_ms;       // 两次采样等待时间
+static uint32_t report_ms;     // 下一次上报时间
+static uint8_t discard_count;  // 还要丢弃的样本数
 
-pt100_data_t pt100;
-
-static int16_t raw_buf[CH_COUNT];
-static int32_t uv_buf[CH_COUNT];
-static uint8_t ready;
-static uint8_t ch;
-static uint32_t read_ms;
-static uint32_t wait_ms;
-static uint32_t report_ms;
-
-static uint16_t make_cfg(uint8_t index)
+// 生成当前 PT100 使用的 GD30 配置
+static uint16_t make_cfg(void)
 {
-    return gd30_make_config(gd30_ch[index], PT100_PGA, PT100_RATE);
+    return gd30_make_config(GD30_CH0, PT100_PGA, PT100_RATE);
 }
 
+// 状态转短字符串, 方便串口打印
 const char *pt100_status_text(pt100_status_t status)
 {
     switch (status)
@@ -54,20 +44,16 @@ const char *pt100_status_text(pt100_status_t status)
     }
 }
 
+// 设置测量状态和 ok 标志
 static void set_status(pt100_status_t status)
 {
     pt100.status = status;
     pt100.ok = (status == PT100_OK);
 }
 
+// 清空 PT100 数据
 static void clear_data(void)
 {
-    for (uint8_t i = 0; i < CH_COUNT; i++)
-    {
-        raw_buf[i] = 0;
-        uv_buf[i] = 0;
-    }
-
     pt100.raw = 0;
     pt100.ain0_uv = 0;
     pt100.lead_uv = 0;
@@ -77,32 +63,28 @@ static void clear_data(void)
     pt100.status = PT100_WAIT;
     pt100.ok = 0;
     pt100.ref_on = 0;
-    ready = 0;
+    discard_count = PT100_DISCARD_SAMPLES;
 }
 
-static void calc_temp(void)
+// GD30 raw 按 2.5V reference 转 uV
+static int32_t raw_to_uv(int16_t raw)
+{
+    return (int32_t)((int64_t)raw * PT100_REF_UV / 32768LL);
+}
+
+// 保存一次 ADC 值并换算温度
+static void save_adc(int16_t raw)
 {
     int32_t r;
     int32_t pt_uv;
-    int32_t lead;
     pt100_calc_t ret;
 
-    if (ready != READY_ALL)
-    {
-        set_status(PT100_WAIT);
-        return;
-    }
+    pt100.raw = raw;
+    pt100.ain0_uv = raw_to_uv(raw);
+    pt100.lead_uv = 0;
 
-    ret = pt100_calc_res(uv_buf[CH_MAIN],
-                         uv_buf[CH_RED],
-                         uv_buf[CH_VFORCE],
-                         &r,
-                         &pt_uv,
-                         &lead);
+    ret = pt100_calc_res(pt100.ain0_uv, &r, &pt_uv);
 
-    pt100.raw = raw_buf[CH_MAIN];
-    pt100.ain0_uv = uv_buf[CH_MAIN];
-    pt100.lead_uv = lead;
     pt100.pt_uv = pt_uv;
     pt100.r_mohm = r;
     pt100.temp = pt100_res_to_temp(r);
@@ -121,14 +103,7 @@ static void calc_temp(void)
     }
 }
 
-static void save_adc(uint8_t index, int16_t raw)
-{
-    raw_buf[index] = raw;
-    uv_buf[index] = gd30_sample_to_microvolt(raw, PT100_PGA);
-    ready |= (uint8_t)(1 << index);
-    calc_temp();
-}
-
+// 通过 RS485 打印 PT100 当前值
 static void report_pt100(void)
 {
     int32_t temp = pt100.temp;
@@ -153,15 +128,25 @@ static void report_pt100(void)
                  pt100.ref_on ? "ON" : "OFF");
 }
 
+// 初始化 PT100 采样链路
 void pt100_app_init(void)
 {
-    clear_data();
-    pt100.ref_on = gd30_bsp_enable_ain3_reference();
+    uint8_t i;
 
-    ch = 0;
+    clear_data();
+
+    for (i = 0; i < PT100_REF_RETRY; i++)
+    {
+        pt100.ref_on = gd30_bsp_enable_ain3_reference();
+        if (pt100.ref_on)
+        {
+            break;
+        }
+    }
+
     wait_ms = gd30_rate_wait_ms(PT100_RATE);
 
-    if (gd30_bsp_configure(make_cfg(ch)) == 0)
+    if (gd30_bsp_configure(make_cfg()) == 0)
     {
         set_status(PT100_SPI);
     }
@@ -170,6 +155,7 @@ void pt100_app_init(void)
     report_ms = systick_get_ms() + REPORT_MS;
 }
 
+// PT100 周期采样和上报任务
 void pt100_task(void)
 {
     uint32_t now = systick_get_ms();
@@ -177,18 +163,17 @@ void pt100_task(void)
     if ((int32_t)(now - read_ms) >= 0)
     {
         uint16_t rx;
-        uint8_t done = ch;
-        uint8_t next = (uint8_t)(ch + 1);
 
-        if (next >= CH_COUNT)
+        if (gd30_transfer16(make_cfg(), &rx) == 0)
         {
-            next = 0;
-        }
-
-        if (gd30_transfer16(make_cfg(next), &rx) == 0)
-        {
-            ch = next;
-            save_adc(done, (int16_t)rx);
+            if (discard_count > 0)
+            {
+                discard_count--;
+            }
+            else
+            {
+                save_adc((int16_t)rx);
+            }
         }
         else
         {

@@ -8,43 +8,44 @@
 #include <stdio.h>
 #include <string.h>
 
-#define OLED_PAGE_COUNT      (OLED_HEIGHT / 8U)
-#define OLED_ALL_PAGES       ((uint8_t)((1U << OLED_PAGE_COUNT) - 1U))
-#define OLED_CMD_BUF_SIZE    7U
-#define OLED_SYNC_TIMEOUT_MS 200U
-#define OLED_TEXT_CACHE_SLOTS     8U
-#define OLED_TEXT_CACHE_TEXT_SIZE 22U
+#define OLED_PAGE_COUNT      (OLED_HEIGHT / 8U) // 8 像素为一页
+#define OLED_ALL_PAGES       ((uint8_t)((1U << OLED_PAGE_COUNT) - 1U)) // 所有页 mask
+#define OLED_CMD_BUF_SIZE    7U     // 页地址命令缓存大小
+#define OLED_SYNC_TIMEOUT_MS 200U   // 同步等待超时
+#define OLED_TEXT_CACHE_SLOTS     8U  // 文本缓存槽数量
+#define OLED_TEXT_CACHE_TEXT_SIZE 22U // 文本缓存长度
 
 typedef struct {
-    uint8_t char_w;
-    uint8_t char_h;
-    uint8_t rows;
-    uint8_t cols;
+    uint8_t char_w; // 字符宽度
+    uint8_t char_h; // 字符高度
+    uint8_t rows;   // 文本行数
+    uint8_t cols;   // 文本列数
 } oled_font_info_t;
 
 typedef struct {
-    uint8_t valid;
-    uint8_t font;
-    uint8_t x;
-    uint8_t y;
-    uint8_t w;
-    uint8_t h;
-    char text[OLED_TEXT_CACHE_TEXT_SIZE];
+    uint8_t valid; // 缓存有效标志
+    uint8_t font;  // 字体大小
+    uint8_t x;     // 左上角 x
+    uint8_t y;     // 左上角 y
+    uint8_t w;     // 缓存区域宽
+    uint8_t h;     // 缓存区域高
+    char text[OLED_TEXT_CACHE_TEXT_SIZE]; // 已显示文本
 } oled_text_cache_t;
 
-static uint8_t oled_inited;
-static uint8_t oled_gram[OLED_WIDTH][OLED_PAGE_COUNT];
-static uint8_t oled_cmd_buf[OLED_CMD_BUF_SIZE];
-static uint8_t oled_data_buf[OLED_WIDTH * OLED_PAGE_COUNT];
-static volatile uint8_t oled_dirty_pages;
-static uint8_t oled_busy;
-static uint8_t oled_error;
-static uint8_t oled_next_page;
-static oled_text_cache_t oled_text_cache[OLED_TEXT_CACHE_SLOTS];
-static uint8_t oled_text_cache_next;
+static uint8_t oled_inited; // OLED 初始化标志
+static uint8_t oled_gram[OLED_WIDTH][OLED_PAGE_COUNT]; // OLED 显存镜像
+static uint8_t oled_cmd_buf[OLED_CMD_BUF_SIZE];        // 页刷新命令缓存
+static uint8_t oled_data_buf[OLED_WIDTH * OLED_PAGE_COUNT]; // 页刷新数据缓存
+static volatile uint8_t oled_dirty_pages; // 需要刷新的页 mask
+static uint8_t oled_busy;                 // 刷新 busy 标志
+static uint8_t oled_error;                // 最近一次刷新错误
+static uint8_t oled_next_page;            // 下次 service 优先刷新的页
+static oled_text_cache_t oled_text_cache[OLED_TEXT_CACHE_SLOTS]; // 文本显示缓存
+static uint8_t oled_text_cache_next;      // 下一个缓存槽
 
 static uint8_t oled_wait_ready(uint32_t timeout_ms);
 
+// 非 ASCII 字符先按空格处理
 static uint8_t oled_normalize_ascii(uint8_t ch)
 {
     if ((ch < (uint8_t)OLED_FONT_ASCII_FIRST) || (ch > (uint8_t)OLED_FONT_ASCII_LAST)) {
@@ -54,6 +55,7 @@ static uint8_t oled_normalize_ascii(uint8_t ch)
     return ch;
 }
 
+// 根据字体编号取字符宽高
 static uint8_t oled_get_font_info(uint8_t font, oled_font_info_t *info)
 {
     if (info == NULL) {
@@ -76,6 +78,7 @@ static uint8_t oled_get_font_info(uint8_t font, oled_font_info_t *info)
     return OLED_OK;
 }
 
+// 文本行列转换成像素矩形
 static uint8_t oled_text_to_rect(uint8_t font, uint8_t row, uint8_t col, uint8_t cols,
                                  uint8_t *x, uint8_t *y, uint8_t *w, uint8_t *h)
 {
@@ -103,6 +106,7 @@ static uint8_t oled_text_to_rect(uint8_t font, uint8_t row, uint8_t col, uint8_t
     return OLED_OK;
 }
 
+// 连续写 OLED 命令
 static uint8_t oled_write_cmds(const uint8_t *cmds, uint8_t len)
 {
     if ((cmds == NULL) || (len == 0U)) {
@@ -112,11 +116,13 @@ static uint8_t oled_write_cmds(const uint8_t *cmds, uint8_t len)
     return oled_bus_write(0x00U, cmds, len);
 }
 
+// 写 1 条 OLED 命令
 static uint8_t oled_write_cmd(uint8_t cmd)
 {
     return oled_write_cmds(&cmd, 1U);
 }
 
+// SSD1306 128x32 初始化命令
 static uint8_t oled_config_128x32(void)
 {
     static const uint8_t init_cmds[] = {
@@ -140,6 +146,7 @@ static uint8_t oled_config_128x32(void)
     return oled_write_cmds(init_cmds, (uint8_t)sizeof(init_cmds));
 }
 
+// 起止页转换成 dirty mask
 static uint8_t oled_pages_to_mask(uint8_t start_page, uint8_t end_page)
 {
     uint8_t page;
@@ -152,6 +159,7 @@ static uint8_t oled_pages_to_mask(uint8_t start_page, uint8_t end_page)
     return mask;
 }
 
+// 判断两个矩形是否重叠
 static uint8_t oled_rects_overlap(uint8_t left_a, uint8_t top_a, uint8_t right_a, uint8_t bottom_a,
                                   uint8_t left_b, uint8_t top_b, uint8_t right_b, uint8_t bottom_b)
 {
@@ -162,6 +170,7 @@ static uint8_t oled_rects_overlap(uint8_t left_a, uint8_t top_a, uint8_t right_a
     return 1U;
 }
 
+// 图形修改后让相关文本缓存失效
 static void oled_text_cache_invalidate_rect(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom)
 {
     uint8_t i;
@@ -183,12 +192,14 @@ static void oled_text_cache_invalidate_rect(uint8_t left, uint8_t top, uint8_t r
     }
 }
 
+// 清空所有文本缓存
 static void oled_text_cache_invalidate_all(void)
 {
     (void)memset(oled_text_cache, 0, sizeof(oled_text_cache));
     oled_text_cache_next = 0U;
 }
 
+// 查找相同区域的文本缓存
 static int oled_text_cache_find(uint8_t font, uint8_t x, uint8_t y, uint8_t w, uint8_t h)
 {
     uint8_t i;
@@ -207,6 +218,7 @@ static int oled_text_cache_find(uint8_t font, uint8_t x, uint8_t y, uint8_t w, u
     return -1;
 }
 
+// 保存一条文本缓存
 static void oled_text_cache_store(uint8_t font, uint8_t x, uint8_t y, uint8_t w, uint8_t h,
                                   const char *text)
 {
@@ -231,6 +243,7 @@ static void oled_text_cache_store(uint8_t font, uint8_t x, uint8_t y, uint8_t w,
     oled_text_cache[slot].text[OLED_TEXT_CACHE_TEXT_SIZE - 1U] = '\0';
 }
 
+// 判断文本内容是否已经显示过
 static uint8_t oled_text_cache_matches(uint8_t font, uint8_t x, uint8_t y, uint8_t w, uint8_t h,
                                        const char *text)
 {
@@ -243,6 +256,7 @@ static uint8_t oled_text_cache_matches(uint8_t font, uint8_t x, uint8_t y, uint8
     return (strcmp(oled_text_cache[cached].text, text) == 0) ? 1U : 0U;
 }
 
+// 只改显存里的矩形区域
 static uint8_t oled_fill_rect_gram(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom, uint8_t color)
 {
     uint8_t page;
@@ -283,6 +297,7 @@ static uint8_t oled_fill_rect_gram(uint8_t left, uint8_t top, uint8_t right, uin
     return OLED_OK;
 }
 
+// 标记某个像素范围对应的页需要刷新
 static void oled_mark_pages(uint8_t top, uint8_t bottom)
 {
     uint8_t page;
@@ -306,11 +321,13 @@ static void oled_mark_pages(uint8_t top, uint8_t bottom)
     }
 }
 
+// 标记整屏都要刷新
 static void oled_mark_all_dirty(void)
 {
     oled_dirty_pages = OLED_ALL_PAGES;
 }
 
+// 从 dirty mask 找第一段连续页
 static void oled_find_window(uint8_t mask, uint8_t *start_page, uint8_t *end_page)
 {
     uint8_t page;
@@ -331,6 +348,7 @@ static void oled_find_window(uint8_t mask, uint8_t *start_page, uint8_t *end_pag
     }
 }
 
+// 从指定页开始找下一段连续 dirty 页
 static void oled_find_window_from(uint8_t mask, uint8_t first_page, uint8_t *start_page, uint8_t *end_page)
 {
     uint8_t i;
@@ -353,6 +371,7 @@ static void oled_find_window_from(uint8_t mask, uint8_t first_page, uint8_t *sta
     }
 }
 
+// 准备设置页地址的命令
 static void oled_prepare_page_cmd(uint8_t page)
 {
     oled_cmd_buf[0] = (uint8_t)(0xB0U | page);
@@ -360,6 +379,7 @@ static void oled_prepare_page_cmd(uint8_t page)
     oled_cmd_buf[2] = 0x10U;
 }
 
+// 把一页显存整理到发送缓存
 static uint16_t oled_prepare_page_data(uint8_t page)
 {
     uint8_t x;
@@ -373,6 +393,7 @@ static uint16_t oled_prepare_page_data(uint8_t page)
     return len;
 }
 
+// 刷新一段连续页
 static uint8_t oled_flush_window(uint8_t start_page, uint8_t end_page)
 {
     uint8_t page;
@@ -396,6 +417,7 @@ static uint8_t oled_flush_window(uint8_t start_page, uint8_t end_page)
     return OLED_OK;
 }
 
+// 同步刷新所有 dirty 页
 static uint8_t oled_update_dirty_sync(void)
 {
     uint8_t res;
@@ -429,6 +451,7 @@ static uint8_t oled_update_dirty_sync(void)
     return OLED_OK;
 }
 
+// 画 6x8 ASCII 字符
 static void oled_draw_char_6x8(uint8_t x, uint8_t page, uint8_t ch, uint8_t color)
 {
     uint8_t col;
@@ -442,6 +465,7 @@ static void oled_draw_char_6x8(uint8_t x, uint8_t page, uint8_t ch, uint8_t colo
     }
 }
 
+// 画 8x16 ASCII 字符
 static void oled_draw_char_8x16(uint8_t x, uint8_t page, uint8_t ch, uint8_t color)
 {
     uint8_t col;
@@ -462,6 +486,7 @@ static void oled_draw_char_8x16(uint8_t x, uint8_t page, uint8_t ch, uint8_t col
     }
 }
 
+// 初始化 OLED 控制器和显存
 uint8_t oled_init(void)
 {
     uint8_t res;
@@ -493,6 +518,7 @@ uint8_t oled_init(void)
     return oled_write_cmd(0xAFU);
 }
 
+// 关闭 OLED 并释放 bus
 uint8_t oled_deinit(void)
 {
     uint8_t res;
@@ -513,6 +539,7 @@ uint8_t oled_deinit(void)
     return (res == OLED_OK) ? OLED_OK : OLED_ERR;
 }
 
+// 清屏, 只改显存并标记 dirty
 uint8_t oled_clear(void)
 {
     if (oled_inited == 0U) {
@@ -526,6 +553,7 @@ uint8_t oled_clear(void)
     return OLED_OK;
 }
 
+// 阻塞刷新所有 dirty 页
 uint8_t oled_update(void)
 {
     if (oled_inited == 0U) {
@@ -535,6 +563,7 @@ uint8_t oled_update(void)
     return oled_update_dirty_sync();
 }
 
+// 单次服务刷新一段 dirty 页
 uint8_t oled_service(void)
 {
     uint8_t res;
@@ -570,6 +599,7 @@ uint8_t oled_service(void)
     return (oled_dirty_pages != 0U) ? OLED_BUSY : OLED_OK;
 }
 
+// 等待当前刷新结束
 static uint8_t oled_wait_ready(uint32_t timeout_ms)
 {
     uint32_t start = systick_get_ms();
@@ -583,6 +613,7 @@ static uint8_t oled_wait_ready(uint32_t timeout_ms)
     return (oled_error == OLED_OK) ? OLED_OK : OLED_ERR;
 }
 
+// 打开 OLED 显示
 uint8_t oled_display_on(void)
 {
     uint8_t res;
@@ -599,6 +630,7 @@ uint8_t oled_display_on(void)
     return oled_write_cmd(0xAFU);
 }
 
+// 关闭 OLED 显示
 uint8_t oled_display_off(void)
 {
     uint8_t res;
@@ -615,6 +647,7 @@ uint8_t oled_display_off(void)
     return oled_write_cmd(0xAEU);
 }
 
+// 设置一个像素点
 uint8_t oled_draw_point(uint8_t x, uint8_t y, uint8_t color)
 {
     uint8_t page;
@@ -637,6 +670,7 @@ uint8_t oled_draw_point(uint8_t x, uint8_t y, uint8_t color)
     return OLED_OK;
 }
 
+// 填充矩形并标记刷新
 uint8_t oled_fill_rect(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom, uint8_t color)
 {
     if (oled_inited == 0U) {
@@ -657,6 +691,7 @@ uint8_t oled_fill_rect(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom,
     return OLED_OK;
 }
 
+// 按像素坐标显示 ASCII 字符串
 uint8_t oled_show_string(uint8_t x, uint8_t y, const char *str, uint8_t font, uint8_t color)
 {
     oled_font_info_t info;
@@ -707,6 +742,7 @@ uint8_t oled_show_string(uint8_t x, uint8_t y, const char *str, uint8_t font, ui
     return OLED_OK;
 }
 
+// 默认 6x8 字体 printf
 int oled_printf(uint8_t x, uint8_t y, const char *format, ...)
 {
     char buffer[128];
@@ -728,6 +764,7 @@ int oled_printf(uint8_t x, uint8_t y, const char *format, ...)
     return len;
 }
 
+// 按文本格清空区域
 uint8_t oled_text_clear(uint8_t font, uint8_t row, uint8_t col, uint8_t cols)
 {
     uint8_t x;
@@ -742,6 +779,7 @@ uint8_t oled_text_clear(uint8_t font, uint8_t row, uint8_t col, uint8_t cols)
     return oled_fill_rect(x, y, (uint8_t)(x + w - 1U), (uint8_t)(y + h - 1U), 0U);
 }
 
+// 按文本格显示字符串, 相同内容不重复刷新
 uint8_t oled_text_show(uint8_t font, uint8_t row, uint8_t col, uint8_t cols, const char *str)
 {
     oled_font_info_t info;
@@ -790,6 +828,7 @@ uint8_t oled_text_show(uint8_t font, uint8_t row, uint8_t col, uint8_t cols, con
     return OLED_OK;
 }
 
+// 按文本格格式化显示
 int oled_text_printf(uint8_t font, uint8_t row, uint8_t col, uint8_t cols, const char *format, ...)
 {
     char buffer[128];

@@ -7,12 +7,13 @@
 #include "gd32f4xx.h"
 #include "onchip_flash_bsp.h"
 
-#define BOOT_COPY_BUF_SIZE 256U
+#define BOOT_COPY_BUF_SIZE 256U // app 搬运临时 buffer 大小
 
-typedef void (*app_entry_t)(void);
+typedef void (*app_entry_t)(void); // app reset handler 类型
 
-static uint8_t copy_buf[BOOT_COPY_BUF_SIZE];
+static uint8_t copy_buf[BOOT_COPY_BUF_SIZE]; // app2 -> app1 搬运缓存
 
+// 检查 app 向量表里的 MSP 和 reset 地址
 static uint8_t boot_app_vector_ok(uint32_t app_base)
 {
     uint32_t msp = *(volatile uint32_t *)app_base;
@@ -31,11 +32,13 @@ static uint8_t boot_app_vector_ok(uint32_t app_base)
     return 1;
 }
 
+// 计算 Flash 上一段数据的 CRC32
 static uint32_t boot_crc32_flash(uint32_t addr, uint32_t size)
 {
     return bl_crc32_calc((const uint8_t *)addr, size);
 }
 
+// 擦除 app1 后把 app2 拷贝过去
 static uint8_t boot_copy_app2_to_app1(uint32_t app_size)
 {
     uint32_t copied = 0;
@@ -71,6 +74,7 @@ static uint8_t boot_copy_app2_to_app1(uint32_t app_size)
     return 1;
 }
 
+// 更新升级标志和错误码
 static void boot_clear_update_flag(bl_param_t *param, uint32_t flag, uint32_t error)
 {
     param->update_flag = flag;
@@ -88,6 +92,7 @@ static void boot_clear_update_flag(bl_param_t *param, uint32_t flag, uint32_t er
     (void)onchip_flash_commit_param(param);
 }
 
+// 关闭中断并跳转到 app
 static void boot_jump_app(uint32_t app_base)
 {
     uint32_t reset_handler;
@@ -119,6 +124,7 @@ static void boot_jump_app(uint32_t app_base)
     app_entry();
 }
 
+// 校验 app2, 复制到 app1, 再校验 app1
 static void boot_handle_update(bl_param_t *param)
 {
     uint32_t crc;
@@ -160,6 +166,7 @@ static void boot_handle_update(bl_param_t *param)
     boot_clear_update_flag(param, BL_UPDATE_FLAG_IDLE, BL_ERR_NONE);
 }
 
+// BootLoader 主流程: 处理升级或跳转 app
 void bootloader_run(void)
 {
     bl_param_t param;
@@ -173,6 +180,8 @@ void bootloader_run(void)
     if (param.update_flag == BL_UPDATE_FLAG_PENDING)
     {
         boot_handle_update(&param);
+        boot_uart_printf("BL: reset\r\n");
+        NVIC_SystemReset();
     }
 
     if (boot_app_vector_ok(BL_APP1_START_ADDR) != 0)

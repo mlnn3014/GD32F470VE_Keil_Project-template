@@ -1,18 +1,19 @@
 #include "flash_bsp.h"
 
-#define FLASH_SPI              SPI1
-#define FLASH_GPIO_PORT        GPIOB
-#define FLASH_GPIO_CLK         RCU_GPIOB
-#define FLASH_SPI_CLK          RCU_SPI1
-#define FLASH_PIN_CS           GPIO_PIN_12
-#define FLASH_PIN_SCK          GPIO_PIN_13
-#define FLASH_PIN_MISO         GPIO_PIN_14
-#define FLASH_PIN_MOSI         GPIO_PIN_15
-#define FLASH_DUMMY_BYTE       0xA5
-#define FLASH_SPI_TIMEOUT      100000
+#define FLASH_SPI              SPI1      // 外部 Flash 使用 SPI1
+#define FLASH_GPIO_PORT        GPIOB     // SPI GPIO 端口
+#define FLASH_GPIO_CLK         RCU_GPIOB // SPI GPIO 时钟
+#define FLASH_SPI_CLK          RCU_SPI1  // SPI1 时钟
+#define FLASH_PIN_CS           GPIO_PIN_12 // Flash CS
+#define FLASH_PIN_SCK          GPIO_PIN_13 // Flash SCK
+#define FLASH_PIN_MISO         GPIO_PIN_14 // Flash MISO
+#define FLASH_PIN_MOSI         GPIO_PIN_15 // Flash MOSI
+#define FLASH_DUMMY_BYTE       0xA5     // 读数据时发送的 dummy byte
+#define FLASH_SPI_TIMEOUT      100000   // SPI 等待超时
 
-static uint8_t flash_bus_error;
+static uint8_t flash_bus_error; // SPI bus 错误标志
 
+// 等待 SPI 指定 flag 到目标状态
 static uint8_t flash_wait_flag(uint32_t flag, FlagStatus state)
 {
     uint32_t timeout = FLASH_SPI_TIMEOUT;
@@ -27,6 +28,7 @@ static uint8_t flash_wait_flag(uint32_t flag, FlagStatus state)
     return 1;
 }
 
+// 初始化外部 Flash 的 SPI bus
 void flash_bus_init(void)
 {
     spi_parameter_struct spi_init_struct;
@@ -57,16 +59,19 @@ void flash_bus_init(void)
     flash_bus_clear_error();
 }
 
+// 选中 Flash
 void flash_bus_select(void)
 {
     gpio_bit_reset(FLASH_GPIO_PORT, FLASH_PIN_CS);
 }
 
+// 取消选中 Flash
 void flash_bus_deselect(void)
 {
     gpio_bit_set(FLASH_GPIO_PORT, FLASH_PIN_CS);
 }
 
+// SPI 收发 1 byte
 uint8_t flash_bus_transfer(uint8_t data)
 {
     if (flash_wait_flag(SPI_FLAG_TBE, SET) == 0) {
@@ -79,6 +84,7 @@ uint8_t flash_bus_transfer(uint8_t data)
     return (uint8_t)spi_i2s_data_receive(FLASH_SPI);
 }
 
+// 连续读 Flash bus
 void flash_bus_read(uint8_t *data, uint32_t len)
 {
     while (len > 0) {
@@ -88,6 +94,7 @@ void flash_bus_read(uint8_t *data, uint32_t len)
     }
 }
 
+// 连续写 Flash bus
 void flash_bus_write(const uint8_t *data, uint32_t len)
 {
     while (len > 0) {
@@ -101,11 +108,13 @@ void flash_bus_write(const uint8_t *data, uint32_t len)
     (void)flash_wait_flag(SPI_FLAG_TRANS, RESET);
 }
 
+// 查询 bus 是否正常
 uint8_t flash_bus_ok(void)
 {
     return (flash_bus_error == 0) ? 1 : 0;
 }
 
+// 清 bus 错误标志
 void flash_bus_clear_error(void)
 {
     flash_bus_error = 0;

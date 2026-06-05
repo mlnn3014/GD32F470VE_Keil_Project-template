@@ -2,21 +2,22 @@
 
 #include "gd32f4xx.h"
 
-#define LP_EXTI_INTEN   REG32(EXTI_BASE + 0x00U)
-#define LP_EXTI_RTEN    REG32(EXTI_BASE + 0x08U)
-#define LP_EXTI_FTEN    REG32(EXTI_BASE + 0x0CU)
-#define LP_EXTI_PD      REG32(EXTI_BASE + 0x14U)
-#define LP_SYSCFG_EXTISS0 REG32(SYSCFG_BASE + 0x08U)
+#define LP_EXTI_INTEN   REG32(EXTI_BASE + 0x00U)     // EXTI interrupt enable
+#define LP_EXTI_RTEN    REG32(EXTI_BASE + 0x08U)     // EXTI rising enable
+#define LP_EXTI_FTEN    REG32(EXTI_BASE + 0x0CU)     // EXTI falling enable
+#define LP_EXTI_PD      REG32(EXTI_BASE + 0x14U)     // EXTI pending
+#define LP_SYSCFG_EXTISS0 REG32(SYSCFG_BASE + 0x08U) // EXTI source select
 
-#define LP_EXTI0        BIT(0)
+#define LP_EXTI0        BIT(0) // PA0 wakeup line
 
-#define LP_USART0_RX_DMA DMA_CH2
-#define LP_USART0_TX_DMA DMA_CH7
-#define LP_USART1_RX_DMA DMA_CH5
-#define LP_USART2_RX_DMA DMA_CH1
-#define LP_OLED_DMA      DMA_CH6
-#define LP_ADC_DMA       DMA_CH0
+#define LP_USART0_RX_DMA DMA_CH2 // UART0 RX DMA
+#define LP_USART0_TX_DMA DMA_CH7 // UART0 TX DMA
+#define LP_USART1_RX_DMA DMA_CH5 // RS485 RX DMA
+#define LP_USART2_RX_DMA DMA_CH1 // OTA RX DMA
+#define LP_OLED_DMA      DMA_CH6 // OLED DMA
+#define LP_ADC_DMA       DMA_CH0 // ADC DMA
 
+// 关闭各路 USART 和 DMA
 static void low_power_usart_off(void)
 {
     usart_interrupt_disable(USART0, USART_INT_IDLE);
@@ -43,6 +44,7 @@ static void low_power_usart_off(void)
     nvic_irq_disable(USART2_IRQn);
 }
 
+// 关闭 OLED I2C 和 DMA
 static void low_power_oled_off(void)
 {
     i2c_dma_config(I2C0, I2C_DMA_OFF);
@@ -52,6 +54,7 @@ static void low_power_oled_off(void)
     gpio_mode_set(GPIOB, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_8 | GPIO_PIN_9);
 }
 
+// 关闭 SPI, 并把相关脚放到低功耗状态
 static void low_power_spi_off(void)
 {
     gpio_bit_set(GPIOB, GPIO_PIN_12);
@@ -78,6 +81,7 @@ static void low_power_spi_off(void)
     gpio_bit_set(GPIOE, GPIO_PIN_8);
 }
 
+// 关闭 ADC/DAC
 static void low_power_adc_dac_off(void)
 {
     adc_dma_mode_disable(ADC0);
@@ -90,6 +94,7 @@ static void low_power_adc_dac_off(void)
     gpio_mode_set(GPIOA, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_PIN_4);
 }
 
+// 统一设置进低功耗前的 GPIO 状态
 static void low_power_gpio_state(void)
 {
     rcu_periph_clock_enable(RCU_GPIOA);
@@ -126,6 +131,7 @@ static void low_power_gpio_state(void)
     gpio_mode_set(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_PIN_0);
 }
 
+// 配置 PA0 作为唤醒中断
 static void low_power_wakeup_exti_init(void)
 {
     rcu_periph_clock_enable(RCU_SYSCFG);
@@ -142,6 +148,7 @@ static void low_power_wakeup_exti_init(void)
     nvic_irq_enable(EXTI0_IRQn, 1U, 0U);
 }
 
+// 进入 deep-sleep, 唤醒后直接复位
 void low_power_enter_deepsleep(void)
 {
     rcu_periph_clock_enable(RCU_PMU);
@@ -167,6 +174,7 @@ void low_power_enter_deepsleep(void)
     NVIC_SystemReset();
 }
 
+// PA0 唤醒中断
 void EXTI0_IRQHandler(void)
 {
     LP_EXTI_PD = LP_EXTI0;

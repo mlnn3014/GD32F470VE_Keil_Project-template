@@ -8,8 +8,8 @@ extern "C"
 {
 #endif
 
-void scheduler_init(void);
-void scheduler_run(void);
+void scheduler_init(void); // 初始化任务表
+void scheduler_run(void);  // 扫描并运行到期任务
 
 #ifdef __cplusplus
 }

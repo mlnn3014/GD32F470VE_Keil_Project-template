@@ -5,10 +5,12 @@
 #include "systick.h"
 #include "uart0_app.h"
 
+// 低功耗 app 初始化, 目前不用额外状态
 void low_power_app_init(void)
 {
 }
 
+// 关掉显示后进入 deep-sleep
 void low_power_app_enter(void)
 {
     uart0_printf("LowPower: enter deepsleep, wakeup by PA0\r\n");

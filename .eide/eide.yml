@@ -23,6 +23,8 @@ virtualFolder:
         - path: App/Src/command_app.c
         - path: App/Src/pt100_app.c
         - path: App/Src/pt100_convert.c
+        - path: App/Src/ota_app.c
+        - path: App/Src/low_power_app.c
       folders: []
     - name: Core
       files:
@@ -43,26 +45,29 @@ virtualFolder:
         - path: Bsp/Src/oled_bsp.c
         - path: Bsp/Src/flash_bsp.c
         - path: Bsp/Src/gd30_bsp.c
+        - path: Bsp/Src/low_power_bsp.c
+        - path: Bsp/Src/ota_bsp.c
+        - path: Bsp/Src/onchip_flash_bsp.c
       folders: []
     - name: Components
       files: []
       folders:
         - name: gd25qxx
           files:
-            - path: Compenents/gd25qxx/gd25qxx.c
+            - path: Components/gd25qxx/gd25qxx.c
           folders: []
         - name: gd30ad3344
           files:
-            - path: Compenents/gd30ad3344/gd30ad3344.c
+            - path: Components/gd30ad3344/gd30ad3344.c
           folders: []
         - name: oled
           files:
-            - path: Compenents/oled/oled.c
-            - path: Compenents/oled/oledfont.c
+            - path: Components/oled/oled.c
+            - path: Components/oled/oledfont.c
           folders: []
         - name: ring_buffer
           files:
-            - path: Compenents/ring_buffer/ring_buffer.c
+            - path: Components/ring_buffer/ring_buffer.c
           folders: []
     - name: Middleware
       files: []
@@ -100,13 +105,14 @@ targets:
         - GD32F470
         - __PERF_COUNTER_CFG_USE_SYSTICK_WRAPPER__
       incList:
+        - common
         - Core/Inc
         - App/Inc
         - Bsp/Inc
-        - Compenents/gd30ad3344
-        - Compenents/oled
-        - Compenents/gd25qxx
-        - Compenents/ring_buffer
+        - Components/gd30ad3344
+        - Components/oled
+        - Components/gd25qxx
+        - Components/ring_buffer
         - Firmware/GD32F4xx_standard_peripheral/Include
         - .cmsis/include
         - Firmware/CMSIS
@@ -146,10 +152,10 @@ targets:
               - .bin
             misc-controls: --diag_suppress=L6329
             output-format: elf
-            ro-base: "0x08000000"
+            ro-base: "0x0800D000"
             rw-base: "0x20000000"
             xo-base: ""
-        scatterFilePath: ""
+        scatterFilePath: Project/App_F470.sct
         storageLayout:
           RAM:
             - id: 1
@@ -213,8 +219,8 @@ targets:
               isChecked: true
               isStartup: true
               mem:
-                size: "0x80000"
-                startAddr: "0x8000000"
+                size: "0x38000"
+                startAddr: "0x0800D000"
               tag: IROM
             - id: 2
               isChecked: false
@@ -223,7 +229,7 @@ targets:
                 size: "0x0"
                 startAddr: "0x0"
               tag: IROM
-        useCustomScatterFile: false
+        useCustomScatterFile: true
     uploadConfigMap:
       JLink:
         baseAddr: ""

@@ -35,8 +35,8 @@ OF SUCH DAMAGE.
 #include "gd32f4xx.h"
 #include "systick.h"
 
-static volatile uint32_t delay_remaining_ms;
-static volatile uint32_t system_tick_ms;
+static volatile uint32_t delay_remaining_ms; // delay_1ms 剩余计数
+static volatile uint32_t system_tick_ms;     // 系统运行 ms 计数
 
 /*!
     \brief    configure systick

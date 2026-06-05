@@ -1,0 +1,48 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "GD32F470VET6",
+            "compilerPath": "C:/Users/ASUS/AppData/Local/Keil_v5/ARM/ARMCLANG/bin/armclang.exe",
+            "compilerArgs": [
+                "--target=arm-arm-none-eabi",
+                "-mcpu=cortex-m4",
+                "-std=c99"
+            ],
+            "intelliSenseMode": "windows-clang-arm",
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "defines": [
+                "USE_STDPERIPH_DRIVER",
+                "GD32F470",
+                "__PERF_COUNTER_CFG_USE_SYSTICK_WRAPPER__"
+            ],
+            "includePath": [
+                "${workspaceFolder}/common",
+                "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/App/Inc",
+                "${workspaceFolder}/Bsp/Inc",
+                "${workspaceFolder}/Components/gd30ad3344",
+                "${workspaceFolder}/Components/oled",
+                "${workspaceFolder}/Components/gd25qxx",
+                "${workspaceFolder}/Components/ring_buffer",
+                "${workspaceFolder}/Firmware/GD32F4xx_standard_peripheral/Include",
+                "${workspaceFolder}/.cmsis/include",
+                "${workspaceFolder}/Firmware/CMSIS",
+                "${workspaceFolder}/Firmware/CMSIS/GD/GD32F4xx/Include",
+                "${workspaceFolder}/Project/RTE/_GD32F470VET6_Project"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/common",
+                    "${workspaceFolder}/Core/Inc",
+                    "${workspaceFolder}/App/Inc",
+                    "${workspaceFolder}/Bsp/Inc",
+                    "${workspaceFolder}/Components",
+                    "${workspaceFolder}/Firmware"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ]
+}

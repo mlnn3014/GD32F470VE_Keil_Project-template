@@ -13,11 +13,12 @@
 
 typedef struct
 {
-    void (*run)(void);
-    uint32_t period_ms;
-    uint32_t last_ms;
+    void (*run)(void);   // 任务函数
+    uint32_t period_ms;  // 任务周期
+    uint32_t last_ms;    // 上次运行时间
 } task_t;
 
+// 简单轮询任务表
 static task_t tasks[] = {
     {uart0_task, 5, 0},
     {rs485_task, 5, 0},
@@ -30,8 +31,9 @@ static task_t tasks[] = {
     {oled_task, 100, 0},
 };
 
-static const uint32_t task_count = sizeof(tasks) / sizeof(tasks[0]);
+static const uint32_t task_count = sizeof(tasks) / sizeof(tasks[0]); // 任务数量
 
+// 初始化每个任务的时间戳
 void scheduler_init(void)
 {
     uint32_t now_ms = systick_get_ms();
@@ -42,6 +44,7 @@ void scheduler_init(void)
     }
 }
 
+// 到点就运行任务
 void scheduler_run(void)
 {
     uint32_t now_ms = systick_get_ms();

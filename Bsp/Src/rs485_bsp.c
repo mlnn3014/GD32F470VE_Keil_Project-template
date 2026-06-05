@@ -3,45 +3,46 @@
 #include "gd32f4xx.h"
 #include "ring_buffer.h"
 
-#define RS485_PERIPH        USART1
+#define RS485_PERIPH        USART1 // RS485 使用 USART1
 #define RS485_CLOCK         RCU_USART1
 #define RS485_IRQn          USART1_IRQn
 #define RS485_BAUDRATE      115200
-#define RS485_DATA_REG      ((uint32_t)&USART_DATA(RS485_PERIPH))
+#define RS485_DATA_REG      ((uint32_t)&USART_DATA(RS485_PERIPH)) // USART 数据寄存器
 
 #define RS485_GPIO_CLOCK    RCU_GPIOA
 #define RS485_GPIO_PORT     GPIOA
-#define RS485_DIR_PIN       GPIO_PIN_1
-#define RS485_TX_PIN        GPIO_PIN_2
-#define RS485_RX_PIN        GPIO_PIN_3
+#define RS485_DIR_PIN       GPIO_PIN_1 // 485 方向控制
+#define RS485_TX_PIN        GPIO_PIN_2 // TX
+#define RS485_RX_PIN        GPIO_PIN_3 // RX
 #define RS485_GPIO_AF       GPIO_AF_7
 
-#define RS485_DMA_PERIPH    DMA0
+#define RS485_DMA_PERIPH    DMA0 // RS485 RX DMA
 #define RS485_DMA_CLOCK     RCU_DMA0
 #define RS485_RX_DMA_CH     DMA_CH5
 #define RS485_DMA_SUBPERIPH DMA_SUBPERI4
 
-#define RS485_RX_DMA_SIZE   512
-#define RS485_RX_RING_SIZE  2048
-#define RS485_TX_RING_SIZE  2048
+#define RS485_RX_DMA_SIZE   512  // RX DMA 环形接收区
+#define RS485_RX_RING_SIZE  2048 // RX 软件 ring
+#define RS485_TX_RING_SIZE  2048 // TX 软件 ring
 
 #if ((RS485_RX_DMA_SIZE & (RS485_RX_DMA_SIZE - 1)) != 0)
 #error "RS485_RX_DMA_SIZE must be a power of 2"
 #endif
 
-#define RS485_RX_DMA_MASK   (RS485_RX_DMA_SIZE - 1)
+#define RS485_RX_DMA_MASK   (RS485_RX_DMA_SIZE - 1) // RX DMA 下标 mask
 
-static uint8_t rs485_rx_dma_buffer[RS485_RX_DMA_SIZE];
-static volatile uint16_t rs485_rx_dma_read_index;
-static volatile uint8_t rs485_rx_poll_busy;
+static uint8_t rs485_rx_dma_buffer[RS485_RX_DMA_SIZE]; // DMA 原始接收区
+static volatile uint16_t rs485_rx_dma_read_index;      // 已搬运到 ring 的 DMA 下标
+static volatile uint8_t rs485_rx_poll_busy;            // 防止 poll 重入
 
-static uint8_t rs485_rx_ring_buffer[RS485_RX_RING_SIZE];
-static ring_buffer_t rs485_rx_ring;
+static uint8_t rs485_rx_ring_buffer[RS485_RX_RING_SIZE]; // RX ring 存储区
+static ring_buffer_t rs485_rx_ring;                      // RX ring 控制块
 
-static uint8_t rs485_tx_ring_buffer[RS485_TX_RING_SIZE];
-static ring_buffer_t rs485_tx_ring;
-static volatile uint8_t rs485_tx_busy_flag;
+static uint8_t rs485_tx_ring_buffer[RS485_TX_RING_SIZE]; // TX ring 存储区
+static ring_buffer_t rs485_tx_ring;                      // TX ring 控制块
+static volatile uint8_t rs485_tx_busy_flag;              // TX 正在发送标志
 
+// 进入临界区
 static uint32_t rs485_enter_critical(void)
 {
     uint32_t primask = __get_PRIMASK();
@@ -50,6 +51,7 @@ static uint32_t rs485_enter_critical(void)
     return primask;
 }
 
+// 恢复临界区前的中断状态
 static void rs485_exit_critical(uint32_t primask)
 {
     if (primask == 0) {
@@ -57,16 +59,19 @@ static void rs485_exit_critical(uint32_t primask)
     }
 }
 
+// RS485 切到发送模式
 static void rs485_set_tx_mode(void)
 {
     gpio_bit_set(RS485_GPIO_PORT, RS485_DIR_PIN);
 }
 
+// RS485 切回接收模式
 static void rs485_set_rx_mode(void)
 {
     gpio_bit_reset(RS485_GPIO_PORT, RS485_DIR_PIN);
 }
 
+// 从 TX ring 快速取 1 byte, 调用者已进临界区
 static uint8_t rs485_tx_pop_byte_fast(uint8_t *data)
 {
     if ((data == 0) || (rs485_tx_ring.count == 0)) {
@@ -80,6 +85,7 @@ static uint8_t rs485_tx_pop_byte_fast(uint8_t *data)
     return 1;
 }
 
+// 如果空闲, 启动一次中断发送
 static void rs485_tx_start_locked(void)
 {
     uint8_t data;
@@ -97,6 +103,7 @@ static void rs485_tx_start_locked(void)
     usart_interrupt_enable(RS485_PERIPH, USART_INT_TBE);
 }
 
+// TBE 中断, 继续发送下一个字节
 static void rs485_tx_handle_tbe(void)
 {
     uint8_t data;
@@ -111,6 +118,7 @@ static void rs485_tx_handle_tbe(void)
     usart_interrupt_enable(RS485_PERIPH, USART_INT_TC);
 }
 
+// TC 中断, 发送完后切回接收
 static void rs485_tx_handle_tc(void)
 {
     uint32_t primask;
@@ -125,6 +133,7 @@ static void rs485_tx_handle_tc(void)
     rs485_exit_critical(primask);
 }
 
+// 写入 TX ring 并尝试启动发送
 static uint16_t rs485_tx_write_buffer(const uint8_t *data, uint16_t length)
 {
     uint16_t written;
@@ -138,6 +147,7 @@ static uint16_t rs485_tx_write_buffer(const uint8_t *data, uint16_t length)
     return written;
 }
 
+// 计算 RX DMA 当前写入下标
 static uint16_t rs485_rx_dma_write_index(void)
 {
     uint16_t write_index;
@@ -148,6 +158,7 @@ static uint16_t rs485_rx_dma_write_index(void)
     return (uint16_t)(write_index & RS485_RX_DMA_MASK);
 }
 
+// 往 RX ring 写入一段数据
 static void rs485_rx_push_block_locked(const uint8_t *data, uint16_t length)
 {
     if ((data == 0) || (length == 0)) {
@@ -157,6 +168,7 @@ static void rs485_rx_push_block_locked(const uint8_t *data, uint16_t length)
     (void)ring_buffer_write(&rs485_rx_ring, data, length);
 }
 
+// 从 DMA buffer 搬一段数据到 RX ring
 static void rs485_rx_copy_dma_block(uint16_t start, uint16_t length)
 {
     uint32_t primask;
@@ -171,6 +183,7 @@ static void rs485_rx_copy_dma_block(uint16_t start, uint16_t length)
     rs485_exit_critical(primask);
 }
 
+// 处理 RX DMA 环形回绕
 static void rs485_rx_copy_dma_to_ring(uint16_t write_index)
 {
     uint16_t read_index = rs485_rx_dma_read_index;
@@ -187,6 +200,7 @@ static void rs485_rx_copy_dma_to_ring(uint16_t write_index)
     }
 }
 
+// 配置 RS485 RX DMA
 static void rs485_rx_dma_config(void)
 {
     dma_single_data_parameter_struct dma_init;
@@ -208,6 +222,7 @@ static void rs485_rx_dma_config(void)
     dma_channel_enable(RS485_DMA_PERIPH, RS485_RX_DMA_CH);
 }
 
+// 初始化 RS485 USART、方向脚和 DMA
 void rs485_init(void)
 {
     ring_buffer_init(&rs485_rx_ring, rs485_rx_ring_buffer, RS485_RX_RING_SIZE);
@@ -245,6 +260,7 @@ void rs485_init(void)
     usart_interrupt_enable(RS485_PERIPH, USART_INT_IDLE);
 }
 
+// 写 RS485 数据
 uint16_t rs485_write(const uint8_t *data, uint16_t length)
 {
     if ((data == 0) || (length == 0)) {
@@ -254,6 +270,7 @@ uint16_t rs485_write(const uint8_t *data, uint16_t length)
     return rs485_tx_write_buffer(data, length);
 }
 
+// 读 RS485 数据
 uint16_t rs485_read(uint8_t *data, uint16_t length)
 {
     uint16_t read_count;
@@ -272,6 +289,7 @@ uint16_t rs485_read(uint8_t *data, uint16_t length)
     return read_count;
 }
 
+// 查询 RS485 可读数量
 uint16_t rs485_available(void)
 {
     uint16_t available;
@@ -285,6 +303,7 @@ uint16_t rs485_available(void)
     return available;
 }
 
+// 轮询 DMA 写位置并搬运新数据
 void rs485_poll(void)
 {
     uint16_t write_index;
@@ -306,6 +325,7 @@ void rs485_poll(void)
     rs485_exit_critical(primask);
 }
 
+// RS485 USART 中断入口
 void rs485_irq_handler(void)
 {
     if (usart_interrupt_flag_get(RS485_PERIPH, USART_INT_FLAG_IDLE) != RESET) {

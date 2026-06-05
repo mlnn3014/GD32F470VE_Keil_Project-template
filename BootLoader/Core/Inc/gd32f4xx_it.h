@@ -3,4 +3,6 @@
 
 #include "gd32f4xx.h"
 
+// BootLoader 只需要基础异常和 SysTick 入口
+
 #endif

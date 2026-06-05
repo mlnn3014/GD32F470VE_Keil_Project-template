@@ -3,21 +3,22 @@
 #include "gd32f4xx.h"
 #include "systick.h"
 
-#define ADC_BSP_PERIPH      ADC0
-#define ADC_BSP_CHANNEL     ADC_CHANNEL_10
-#define ADC_BSP_DATA_REG    ((uint32_t)&ADC_RDATA(ADC_BSP_PERIPH))
+#define ADC_BSP_PERIPH      ADC0                              // 使用 ADC0
+#define ADC_BSP_CHANNEL     ADC_CHANNEL_10                    // PC0 对应通道
+#define ADC_BSP_DATA_REG    ((uint32_t)&ADC_RDATA(ADC_BSP_PERIPH)) // ADC 数据寄存器
 
-#define ADC_BSP_GPIO_CLOCK  RCU_GPIOC
-#define ADC_BSP_GPIO_PORT   GPIOC
-#define ADC_BSP_GPIO_PIN    GPIO_PIN_0
+#define ADC_BSP_GPIO_CLOCK  RCU_GPIOC  // ADC 引脚时钟
+#define ADC_BSP_GPIO_PORT   GPIOC      // ADC 引脚端口
+#define ADC_BSP_GPIO_PIN    GPIO_PIN_0 // ADC 输入引脚
 
-#define ADC_BSP_DMA_PERIPH  DMA1
-#define ADC_BSP_DMA_CLOCK   RCU_DMA1
-#define ADC_BSP_DMA_CH      DMA_CH0
-#define ADC_BSP_DMA_SUBPERI DMA_SUBPERI0
+#define ADC_BSP_DMA_PERIPH  DMA1       // ADC DMA 控制器
+#define ADC_BSP_DMA_CLOCK   RCU_DMA1   // ADC DMA 时钟
+#define ADC_BSP_DMA_CH      DMA_CH0    // ADC DMA 通道
+#define ADC_BSP_DMA_SUBPERI DMA_SUBPERI0 // ADC DMA 子外设
 
-static volatile uint16_t adc_sample;
+static volatile uint16_t adc_sample; // DMA 写入的最新 ADC 值
 
+// 配置 ADC 连续采样, DMA 自动搬到 adc_sample
 void adc_init(void)
 {
     dma_single_data_parameter_struct dma_init_struct;
@@ -61,6 +62,7 @@ void adc_init(void)
     adc_software_trigger_enable(ADC_BSP_PERIPH, ADC_ROUTINE_CHANNEL);
 }
 
+// 读取最近一次采样
 uint16_t adc_read(void)
 {
     return adc_sample;

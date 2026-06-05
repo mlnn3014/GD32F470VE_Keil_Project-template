@@ -4,11 +4,12 @@
 #include "pt100_app.h"
 #include "rtc_app.h"
 
-#define OLED_ROW_TEMP 0
-#define OLED_ROW_ADC 1
-#define OLED_ROW_REF 2
-#define OLED_ROW_TIME 3
+#define OLED_ROW_TEMP 0 // 温度显示行
+#define OLED_ROW_ADC 1  // ADC 显示行
+#define OLED_ROW_REF 2  // reference 显示行
+#define OLED_ROW_TIME 3 // 时间显示行
 
+// 刷新 PT100 相关显示
 static void oled_show_pt100(void)
 {
     int32_t temp = pt100.temp;
@@ -28,6 +29,7 @@ static void oled_show_pt100(void)
     oled_text_printf(OLED_FONT_8, OLED_ROW_REF, 0, 0, "REF:%s L:%3ldmV", pt100.ref_on ? "ON " : "OFF", (long)(pt100.lead_uv / 1000));
 }
 
+// OLED 周期刷新任务
 void oled_task(void)
 {
     oled_show_pt100();

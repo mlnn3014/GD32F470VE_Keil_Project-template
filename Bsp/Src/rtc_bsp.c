@@ -1,34 +1,37 @@
 #include "rtc_bsp.h"
 
-#define RTC_BSP_BACKUP_VALUE    0x32F1
-#define RTC_BSP_DEFAULT_YEAR    2025
-#define RTC_BSP_DEFAULT_MONTH   4
-#define RTC_BSP_DEFAULT_DAY     30
-#define RTC_BSP_DEFAULT_WEEKDAY 6
-#define RTC_BSP_DEFAULT_HOUR    23
-#define RTC_BSP_DEFAULT_MINUTE  59
-#define RTC_BSP_DEFAULT_SECOND  50
+#define RTC_BSP_BACKUP_VALUE    0x32F1 // RTC 已初始化标记
+#define RTC_BSP_DEFAULT_YEAR    2025   // 默认年
+#define RTC_BSP_DEFAULT_MONTH   4      // 默认月
+#define RTC_BSP_DEFAULT_DAY     30     // 默认日
+#define RTC_BSP_DEFAULT_WEEKDAY 6      // 默认星期
+#define RTC_BSP_DEFAULT_HOUR    23     // 默认时
+#define RTC_BSP_DEFAULT_MINUTE  59     // 默认分
+#define RTC_BSP_DEFAULT_SECOND  50     // 默认秒
 
-#define RTC_BSP_RTCSRC_MASK     BITS(8, 9)
+#define RTC_BSP_RTCSRC_MASK     BITS(8, 9) // RTC clock source 位
 #define RTC_BSP_RTCSRC_NONE     0x00000000
 #define RTC_BSP_RTCSRC_LXTAL    RCU_RTCSRC_LXTAL
 #define RTC_BSP_RTCSRC_IRC32K   RCU_RTCSRC_IRC32K
 
-static uint32_t rtc_prescaler_a;
-static uint32_t rtc_prescaler_s;
-static rtc_source_t rtc_clock_source;
-static uint8_t rtc_ready;
+static uint32_t rtc_prescaler_a;         // RTC 异步分频
+static uint32_t rtc_prescaler_s;         // RTC 同步分频
+static rtc_source_t rtc_clock_source;    // 当前 RTC 时钟源
+static uint8_t rtc_ready;                // RTC 可用标志
 
+// BCD 转十进制
 static uint8_t rtc_bcd_to_dec(uint8_t value)
 {
     return (uint8_t)(((value >> 4) * 10) + (value & 0x0F));
 }
 
+// 十进制转 BCD
 static uint8_t rtc_dec_to_bcd(uint8_t value)
 {
     return (uint8_t)(((value / 10) << 4) | (value % 10));
 }
 
+// 判断闰年
 static uint8_t rtc_is_leap_year(uint16_t year)
 {
     if ((year % 400) == 0) {
@@ -40,6 +43,7 @@ static uint8_t rtc_is_leap_year(uint16_t year)
     return (uint8_t)((year % 4) == 0);
 }
 
+// 返回某月天数
 static uint8_t rtc_days_in_month(uint16_t year, uint8_t month)
 {
     static const uint8_t days[] = {
@@ -56,6 +60,7 @@ static uint8_t rtc_days_in_month(uint16_t year, uint8_t month)
     return days[month - 1];
 }
 
+// 根据日期计算星期
 static uint8_t rtc_calc_weekday(uint16_t year, uint8_t month, uint8_t day)
 {
     static const uint8_t month_table[] = {
@@ -75,6 +80,7 @@ static uint8_t rtc_calc_weekday(uint16_t year, uint8_t month, uint8_t day)
     return (uint8_t)((weekday == 0) ? RTC_SUNDAY : weekday);
 }
 
+// 检查日期范围
 static uint8_t rtc_date_valid(const rtc_date_t *date)
 {
     uint8_t month_days;
@@ -96,6 +102,7 @@ static uint8_t rtc_date_valid(const rtc_date_t *date)
     return 1;
 }
 
+// 检查时间范围
 static uint8_t rtc_time_valid(const rtc_time_t *time)
 {
     if (time == 0) {
@@ -108,6 +115,7 @@ static uint8_t rtc_time_valid(const rtc_time_t *time)
     return 1;
 }
 
+// 从 datetime 里取出日期
 static void rtc_datetime_get_date(const rtc_datetime_t *datetime, rtc_date_t *date)
 {
     date->year = datetime->year;
@@ -116,6 +124,7 @@ static void rtc_datetime_get_date(const rtc_datetime_t *datetime, rtc_date_t *da
     date->weekday = datetime->weekday;
 }
 
+// 从 datetime 里取出时间
 static void rtc_datetime_get_time(const rtc_datetime_t *datetime, rtc_time_t *time)
 {
     time->hour = datetime->hour;
@@ -123,6 +132,7 @@ static void rtc_datetime_get_time(const rtc_datetime_t *datetime, rtc_time_t *ti
     time->second = datetime->second;
 }
 
+// 把日期写回 datetime
 static void rtc_datetime_set_date(rtc_datetime_t *datetime, const rtc_date_t *date)
 {
     datetime->year = date->year;
@@ -131,6 +141,7 @@ static void rtc_datetime_set_date(rtc_datetime_t *datetime, const rtc_date_t *da
     datetime->weekday = date->weekday;
 }
 
+// 把时间写回 datetime
 static void rtc_datetime_set_time(rtc_datetime_t *datetime, const rtc_time_t *time)
 {
     datetime->hour = time->hour;
@@ -138,6 +149,7 @@ static void rtc_datetime_set_time(rtc_datetime_t *datetime, const rtc_time_t *ti
     datetime->second = time->second;
 }
 
+// 检查完整日期时间
 static uint8_t rtc_datetime_valid(const rtc_datetime_t *datetime)
 {
     rtc_date_t date;
@@ -153,6 +165,7 @@ static uint8_t rtc_datetime_valid(const rtc_datetime_t *datetime)
     return (uint8_t)((rtc_date_valid(&date) != 0) && (rtc_time_valid(&time) != 0));
 }
 
+// app datetime 转 GD32 RTC 参数
 static void rtc_datetime_to_parameter(const rtc_datetime_t *datetime,
                                       rtc_parameter_struct *param)
 {
@@ -175,6 +188,7 @@ static void rtc_datetime_to_parameter(const rtc_datetime_t *datetime,
     param->second = rtc_dec_to_bcd(datetime->second);
 }
 
+// GD32 RTC 参数转 app datetime
 static void rtc_parameter_to_datetime(const rtc_parameter_struct *param,
                                       rtc_datetime_t *datetime)
 {
@@ -187,6 +201,7 @@ static void rtc_parameter_to_datetime(const rtc_parameter_struct *param,
     datetime->second = rtc_bcd_to_dec(param->second);
 }
 
+// 写 RTC 硬件日期时间
 static int rtc_write_datetime(const rtc_datetime_t *datetime)
 {
     rtc_parameter_struct init;
@@ -231,6 +246,7 @@ static int rtc_write_datetime(const rtc_datetime_t *datetime)
     return 0;
 }
 
+// 第一次上电时写默认时间
 static int rtc_setup_time(void)
 {
     static const rtc_datetime_t default_time = {
@@ -246,11 +262,13 @@ static int rtc_setup_time(void)
     return rtc_write_datetime(&default_time);
 }
 
+// 读 BDCTL 里的 RTC clock source
 static uint32_t rtc_clock_source_reg(void)
 {
     return (uint32_t)(RCU_BDCTL & RTC_BSP_RTCSRC_MASK);
 }
 
+// 优先尝试外部低速晶振
 static int rtc_clock_use_lxtal(void)
 {
     rcu_lxtal_drive_capability_config(RCU_LXTALDRI_HIGHER_DRIVE);
@@ -268,6 +286,7 @@ static int rtc_clock_use_lxtal(void)
     return 0;
 }
 
+// 外部晶振失败时用内部 32K
 static int rtc_clock_use_irc32k(void)
 {
     rcu_osci_on(RCU_IRC32K);
@@ -284,6 +303,7 @@ static int rtc_clock_use_irc32k(void)
     return 0;
 }
 
+// 配置新的 RTC clock
 static int rtc_clock_config(void)
 {
     rtc_clock_source = RTC_SOURCE_NONE;
@@ -304,6 +324,7 @@ static int rtc_clock_config(void)
     return 0;
 }
 
+// RTC 已经配置过时恢复软件状态
 static int rtc_clock_resume(void)
 {
     uint32_t source = rtc_clock_source_reg();
@@ -328,6 +349,7 @@ static int rtc_clock_resume(void)
     return 0;
 }
 
+// 初始化 RTC, 保留已有时间或写默认时间
 int rtc_clock_init(void)
 {
     int ret = -1;
@@ -360,6 +382,7 @@ int rtc_clock_init(void)
     return ret;
 }
 
+// 设置完整日期时间
 int rtc_set_datetime(const rtc_datetime_t *datetime)
 {
     int ret;
@@ -376,6 +399,7 @@ int rtc_set_datetime(const rtc_datetime_t *datetime)
     return 0;
 }
 
+// 只设置日期, 时间保持不变
 int rtc_set_date(const rtc_date_t *date)
 {
     rtc_datetime_t datetime;
@@ -391,6 +415,7 @@ int rtc_set_date(const rtc_date_t *date)
     return rtc_set_datetime(&datetime);
 }
 
+// 只读取日期
 int rtc_read_date(rtc_date_t *date)
 {
     rtc_datetime_t datetime;
@@ -410,6 +435,7 @@ int rtc_read_date(rtc_date_t *date)
     return 0;
 }
 
+// 只设置时间, 日期保持不变
 int rtc_set_time(const rtc_time_t *time)
 {
     rtc_datetime_t datetime;
@@ -425,6 +451,7 @@ int rtc_set_time(const rtc_time_t *time)
     return rtc_set_datetime(&datetime);
 }
 
+// 只读取时间
 int rtc_read_time(rtc_time_t *time)
 {
     rtc_datetime_t datetime;
@@ -443,6 +470,7 @@ int rtc_read_time(rtc_time_t *time)
     return 0;
 }
 
+// 读取完整日期时间
 int rtc_read_datetime(rtc_datetime_t *datetime)
 {
     rtc_parameter_struct now;
@@ -467,6 +495,7 @@ int rtc_read_datetime(rtc_datetime_t *datetime)
     return 0;
 }
 
+// 兼容旧接口, 读取时间
 void rtc_read(rtc_time_t *time)
 {
     if (time == 0) {
@@ -480,11 +509,13 @@ void rtc_read(rtc_time_t *time)
     }
 }
 
+// 返回当前时钟源枚举
 rtc_source_t rtc_source(void)
 {
     return rtc_clock_source;
 }
 
+// 返回当前时钟源名称
 const char *rtc_source_name(void)
 {
     if (rtc_clock_source == RTC_SOURCE_LXTAL) {

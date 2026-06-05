@@ -2,6 +2,7 @@
 
 #include "systick.h"
 
+// NMI 异常, 留在现场
 void NMI_Handler(void)
 {
     while (1)
@@ -9,6 +10,7 @@ void NMI_Handler(void)
     }
 }
 
+// HardFault 异常, 留在现场
 void HardFault_Handler(void)
 {
     while (1)
@@ -16,6 +18,7 @@ void HardFault_Handler(void)
     }
 }
 
+// MPU 异常, 留在现场
 void MemManage_Handler(void)
 {
     while (1)
@@ -23,6 +26,7 @@ void MemManage_Handler(void)
     }
 }
 
+// 总线异常, 留在现场
 void BusFault_Handler(void)
 {
     while (1)
@@ -30,6 +34,7 @@ void BusFault_Handler(void)
     }
 }
 
+// 用法异常, 留在现场
 void UsageFault_Handler(void)
 {
     while (1)
@@ -37,6 +42,7 @@ void UsageFault_Handler(void)
     }
 }
 
+// SVC 异常, BootLoader 不处理
 void SVC_Handler(void)
 {
     while (1)
@@ -44,6 +50,7 @@ void SVC_Handler(void)
     }
 }
 
+// DebugMon 异常, BootLoader 不处理
 void DebugMon_Handler(void)
 {
     while (1)
@@ -51,6 +58,7 @@ void DebugMon_Handler(void)
     }
 }
 
+// PendSV 异常, BootLoader 不处理
 void PendSV_Handler(void)
 {
     while (1)
@@ -58,6 +66,7 @@ void PendSV_Handler(void)
     }
 }
 
+// SysTick 中断, 只维护 delay 计数
 void SysTick_Handler(void)
 {
     delay_decrement();

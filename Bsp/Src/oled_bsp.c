@@ -7,30 +7,31 @@
 
 #include <string.h>
 
-#define OLED_BSP_I2C_PERIPH       I2C0
+#define OLED_BSP_I2C_PERIPH       I2C0 // OLED 使用 I2C0
 #define OLED_BSP_I2C_CLOCK        RCU_I2C0
-#define OLED_BSP_I2C_OWN_ADDRESS  0x72
-#define OLED_BSP_I2C_WRITE_ADDR   0x78
-#define OLED_BSP_I2C_DATA_ADDRESS ((uint32_t)&I2C_DATA(OLED_BSP_I2C_PERIPH))
+#define OLED_BSP_I2C_OWN_ADDRESS  0x72 // I2C own address
+#define OLED_BSP_I2C_WRITE_ADDR   0x78 // OLED 7bit 地址左移后的写地址
+#define OLED_BSP_I2C_DATA_ADDRESS ((uint32_t)&I2C_DATA(OLED_BSP_I2C_PERIPH)) // I2C 数据寄存器
 
-#define OLED_BSP_GPIO_CLOCK       RCU_GPIOB
-#define OLED_BSP_GPIO_PORT        GPIOB
-#define OLED_BSP_SCL_PIN          GPIO_PIN_8
-#define OLED_BSP_SDA_PIN          GPIO_PIN_9
+#define OLED_BSP_GPIO_CLOCK       RCU_GPIOB // OLED I2C GPIO 时钟
+#define OLED_BSP_GPIO_PORT        GPIOB     // OLED I2C GPIO 端口
+#define OLED_BSP_SCL_PIN          GPIO_PIN_8 // SCL
+#define OLED_BSP_SDA_PIN          GPIO_PIN_9 // SDA
 
-#define OLED_BSP_DMA_PERIPH       DMA0
+#define OLED_BSP_DMA_PERIPH       DMA0      // OLED DMA 控制器
 #define OLED_BSP_DMA_CLOCK        RCU_DMA0
-#define OLED_BSP_DMA_CH           DMA_CH6
+#define OLED_BSP_DMA_CH           DMA_CH6   // OLED DMA 通道
 #define OLED_BSP_DMA_SUBPERI      DMA_SUBPERI1
 
-#define OLED_BSP_OK               0
-#define OLED_BSP_ERR              1
-#define OLED_BSP_TIMEOUT          3
-#define OLED_BSP_WAIT_TIMEOUT     100000
-#define OLED_BSP_TX_BUF_SIZE      513
+#define OLED_BSP_OK               0      // bus 操作成功
+#define OLED_BSP_ERR              1      // bus 错误
+#define OLED_BSP_TIMEOUT          3      // 等待超时
+#define OLED_BSP_WAIT_TIMEOUT     100000 // I2C/DMA 等待次数
+#define OLED_BSP_TX_BUF_SIZE      513    // control byte + 512 data
 
-static uint8_t oled_tx_buf[OLED_BSP_TX_BUF_SIZE];
+static uint8_t oled_tx_buf[OLED_BSP_TX_BUF_SIZE]; // DMA 发送缓存
 
+// 等待 I2C flag 置位
 static uint8_t oled_wait_i2c_flag_set(uint32_t i2c_periph, i2c_flag_enum flag, uint32_t timeout)
 {
     while (timeout-- != 0) {
@@ -42,6 +43,7 @@ static uint8_t oled_wait_i2c_flag_set(uint32_t i2c_periph, i2c_flag_enum flag, u
     return 0;
 }
 
+// 等待 I2C STOP 清掉
 static uint8_t oled_wait_i2c_stop_clear(uint32_t i2c_periph, uint32_t timeout)
 {
     while (timeout-- != 0) {
@@ -53,6 +55,7 @@ static uint8_t oled_wait_i2c_stop_clear(uint32_t i2c_periph, uint32_t timeout)
     return 0;
 }
 
+// 等待 DMA 发送完成
 static uint8_t oled_wait_dma_ftf(uint32_t timeout)
 {
     while (timeout-- != 0) {
@@ -64,6 +67,7 @@ static uint8_t oled_wait_dma_ftf(uint32_t timeout)
     return 0;
 }
 
+// 等待 I2C 最后一个字节传完
 static uint8_t oled_wait_i2c_tx_complete(uint32_t timeout)
 {
     while (timeout-- != 0) {
@@ -80,6 +84,7 @@ static uint8_t oled_wait_i2c_tx_complete(uint32_t timeout)
     return OLED_BSP_TIMEOUT;
 }
 
+// 等待地址应答, NACK 就返回失败
 static uint8_t oled_wait_addsend_or_nack(uint32_t timeout)
 {
     while (timeout-- != 0) {
@@ -96,6 +101,7 @@ static uint8_t oled_wait_addsend_or_nack(uint32_t timeout)
     return 0;
 }
 
+// 关闭 OLED DMA 中断
 static void oled_dma_int_disable_all(void)
 {
     dma_interrupt_disable(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, DMA_INT_FTF);
@@ -104,6 +110,7 @@ static void oled_dma_int_disable_all(void)
     dma_interrupt_disable(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, DMA_INT_FEE);
 }
 
+// 清 OLED DMA 中断标志
 static void oled_dma_int_clear_all(void)
 {
     dma_interrupt_flag_clear(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, DMA_INT_FLAG_FTF);
@@ -112,6 +119,7 @@ static void oled_dma_int_clear_all(void)
     dma_interrupt_flag_clear(OLED_BSP_DMA_PERIPH, OLED_BSP_DMA_CH, DMA_INT_FLAG_FEE);
 }
 
+// 停止当前 I2C DMA 传输
 static void oled_stop_i2c_dma(void)
 {
     oled_dma_int_disable_all();
@@ -120,6 +128,7 @@ static void oled_stop_i2c_dma(void)
     i2c_dma_last_transfer_config(OLED_BSP_I2C_PERIPH, I2C_DMALST_OFF);
 }
 
+// I2C 卡住时手动释放总线
 static void oled_i2c_bus_reset(void)
 {
     uint8_t i;
@@ -155,6 +164,7 @@ static void oled_i2c_bus_reset(void)
     i2c_ack_config(OLED_BSP_I2C_PERIPH, I2C_ACK_ENABLE);
 }
 
+// 发送前准备 I2C 起始和地址
 static uint8_t oled_prepare_i2c(uint8_t addr)
 {
     uint32_t timeout = 10000;
@@ -203,6 +213,7 @@ static uint8_t oled_prepare_i2c(uint8_t addr)
     return OLED_BSP_OK;
 }
 
+// DMA 结束后补 STOP 并检查 I2C 状态
 static uint8_t oled_tx_finish_blocking(void)
 {
     uint8_t res;
@@ -223,6 +234,7 @@ static uint8_t oled_tx_finish_blocking(void)
     return res;
 }
 
+// 启动一次 OLED I2C DMA 发送
 static uint8_t oled_dma_start(uint8_t control, const uint8_t *buf, uint16_t len)
 {
     uint8_t res;
@@ -256,6 +268,7 @@ static uint8_t oled_dma_start(uint8_t control, const uint8_t *buf, uint16_t len)
     return OLED_BSP_OK;
 }
 
+// 初始化 OLED I2C + DMA
 uint8_t oled_bus_init(void)
 {
     dma_single_data_parameter_struct dma_init_struct;
@@ -294,6 +307,7 @@ uint8_t oled_bus_init(void)
     return OLED_BSP_OK;
 }
 
+// 关闭 OLED bus
 uint8_t oled_bus_deinit(void)
 {
     oled_stop_i2c_dma();
@@ -302,6 +316,7 @@ uint8_t oled_bus_deinit(void)
     return OLED_BSP_OK;
 }
 
+// 阻塞写一包 OLED 命令/数据
 uint8_t oled_bus_write(uint8_t control, const uint8_t *buf, uint16_t len)
 {
     uint8_t res;

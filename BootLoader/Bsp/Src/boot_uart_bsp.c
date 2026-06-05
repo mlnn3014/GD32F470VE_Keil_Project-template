@@ -5,18 +5,19 @@
 
 #include "gd32f4xx.h"
 
-#define BOOT_UART_PERIPH   USART0
+#define BOOT_UART_PERIPH   USART0 // Boot 调试串口
 #define BOOT_UART_CLOCK    RCU_USART0
 #define BOOT_UART_BAUDRATE 115200
 
 #define BOOT_UART_GPIO_CLK RCU_GPIOA
 #define BOOT_UART_GPIO     GPIOA
-#define BOOT_UART_TX_PIN   GPIO_PIN_9
-#define BOOT_UART_RX_PIN   GPIO_PIN_10
+#define BOOT_UART_TX_PIN   GPIO_PIN_9  // Boot UART TX
+#define BOOT_UART_RX_PIN   GPIO_PIN_10 // Boot UART RX
 #define BOOT_UART_AF       GPIO_AF_7
 
-#define BOOT_PRINTF_SIZE   160
+#define BOOT_PRINTF_SIZE   160 // Boot printf 临时 buffer
 
+// 初始化 BootLoader 串口
 void boot_uart_init(void)
 {
     rcu_periph_clock_enable(BOOT_UART_GPIO_CLK);
@@ -35,6 +36,7 @@ void boot_uart_init(void)
     usart_enable(BOOT_UART_PERIPH);
 }
 
+// 阻塞发送 1 byte
 void boot_uart_putc(uint8_t data)
 {
     usart_data_transmit(BOOT_UART_PERIPH, data);
@@ -43,6 +45,7 @@ void boot_uart_putc(uint8_t data)
     }
 }
 
+// 阻塞发送一段数据
 void boot_uart_write(const uint8_t *data, uint32_t len)
 {
     if (data == 0)
@@ -56,6 +59,7 @@ void boot_uart_write(const uint8_t *data, uint32_t len)
     }
 }
 
+// BootLoader 日志输出
 int boot_uart_printf(const char *format, ...)
 {
     char buffer[BOOT_PRINTF_SIZE];

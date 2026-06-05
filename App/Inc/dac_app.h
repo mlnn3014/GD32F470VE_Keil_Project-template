@@ -8,10 +8,10 @@ extern "C"
 {
 #endif
 
-void dac_app_init(void);
-void dac_set_data(uint16_t mv);
-void dac_task(void);
-uint16_t dac_get_value(void);
+void dac_app_init(void);        // 初始化 DAC app 输出值
+void dac_set_data(uint16_t mv); // 设置 DAC 输出电压, mV
+void dac_task(void);            // DAC 周期任务, 预留
+uint16_t dac_get_value(void);   // 读取当前 DAC 设置值
 
 #ifdef __cplusplus
 }

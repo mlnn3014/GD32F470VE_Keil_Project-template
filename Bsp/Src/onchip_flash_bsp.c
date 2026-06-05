@@ -5,8 +5,9 @@
 
 #include "gd32f4xx.h"
 
-static uint8_t param_page_cache[BL_PARAM_SIZE];
+static uint8_t param_page_cache[BL_PARAM_SIZE]; // 参数页写入前的整页缓存
 
+// 计算标准 CRC32
 uint32_t bl_crc32_calc(const uint8_t *data, uint32_t len)
 {
     uint32_t crc = 0xFFFFFFFFUL;
@@ -35,6 +36,7 @@ uint32_t bl_crc32_calc(const uint8_t *data, uint32_t len)
     return crc ^ 0xFFFFFFFFUL;
 }
 
+// 计算参数结构中 param_crc32 前面的 CRC
 uint32_t bl_param_calc_crc(const bl_param_t *param)
 {
     return bl_crc32_calc((const uint8_t *)param,
@@ -42,6 +44,7 @@ uint32_t bl_param_calc_crc(const bl_param_t *param)
                                     (const uint8_t *)param));
 }
 
+// 填充一份默认 Boot 参数
 void bl_param_make_default(bl_param_t *param)
 {
     if (param == 0)
@@ -59,6 +62,7 @@ void bl_param_make_default(bl_param_t *param)
     param->param_crc32 = bl_param_calc_crc(param);
 }
 
+// 检查 Boot 参数 magic、地址和 CRC
 uint8_t bl_param_is_valid(const bl_param_t *param)
 {
     if (param == 0)
@@ -89,6 +93,7 @@ uint8_t bl_param_is_valid(const bl_param_t *param)
     return 1;
 }
 
+// 检查片内 Flash 地址范围
 static uint8_t onchip_flash_addr_ok(uint32_t addr, uint32_t size)
 {
     uint32_t end_addr;
@@ -107,6 +112,7 @@ static uint8_t onchip_flash_addr_ok(uint32_t addr, uint32_t size)
     return 1;
 }
 
+// 清掉 FMC 操作标志
 static void onchip_flash_clear_flags(void)
 {
     fmc_flag_clear(FMC_FLAG_END);
@@ -117,6 +123,7 @@ static void onchip_flash_clear_flags(void)
     fmc_flag_clear(FMC_FLAG_RDDERR);
 }
 
+// 按页擦除片内 Flash
 uint8_t onchip_flash_erase(uint32_t addr, uint32_t size)
 {
     uint32_t page_addr;
@@ -148,6 +155,7 @@ uint8_t onchip_flash_erase(uint32_t addr, uint32_t size)
     return 1;
 }
 
+// 写片内 Flash, 优先按 word 写
 uint8_t onchip_flash_write(uint32_t addr, const uint8_t *data, uint32_t size)
 {
     uint32_t word_value;
@@ -202,6 +210,7 @@ uint8_t onchip_flash_write(uint32_t addr, const uint8_t *data, uint32_t size)
     return 1;
 }
 
+// 从片内 Flash 直接 memcpy 读出
 uint8_t onchip_flash_read(uint32_t addr, uint8_t *data, uint32_t size)
 {
     if ((data == 0) || (onchip_flash_addr_ok(addr, size) == 0))
@@ -213,6 +222,7 @@ uint8_t onchip_flash_read(uint32_t addr, uint8_t *data, uint32_t size)
     return 1;
 }
 
+// 从主/备参数区读取有效参数
 uint8_t onchip_flash_read_param(bl_param_t *param)
 {
     bl_param_t main_param;
@@ -253,6 +263,7 @@ uint8_t onchip_flash_read_param(bl_param_t *param)
     return 0;
 }
 
+// 同时写入主/备参数副本
 uint8_t onchip_flash_commit_param(bl_param_t *param)
 {
     bl_param_t fixed_param;

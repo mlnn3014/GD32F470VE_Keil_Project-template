@@ -3,11 +3,12 @@
 #include "gd32f4xx.h"
 
 typedef struct {
-    rcu_periph_enum clock;
-    uint32_t port;
-    uint32_t pin;
+    rcu_periph_enum clock; // GPIO 时钟
+    uint32_t port;         // GPIO 端口
+    uint32_t pin;          // GPIO 引脚
 } led_hw_t;
 
+// LED 硬件映射表
 static const led_hw_t led_hw[LED_COUNT] = {
     [LED_1] = {RCU_GPIOD, GPIOD, GPIO_PIN_8},
     [LED_2] = {RCU_GPIOD, GPIOD, GPIO_PIN_9},
@@ -17,6 +18,7 @@ static const led_hw_t led_hw[LED_COUNT] = {
     [LED_6] = {RCU_GPIOD, GPIOD, GPIO_PIN_13},
 };
 
+// 初始化全部 LED GPIO
 void led_init(void)
 {
     uint8_t i;
@@ -30,21 +32,25 @@ void led_init(void)
     }
 }
 
+// 设置 LED 输出电平
 void led_set(led_id_t led, uint8_t on)
 {
     gpio_bit_write(led_hw[led].port, led_hw[led].pin, (on != 0) ? SET : RESET);
 }
 
+// 点亮 LED
 void led_on(led_id_t led)
 {
     led_set(led, 1);
 }
 
+// 熄灭 LED
 void led_off(led_id_t led)
 {
     led_set(led, 0);
 }
 
+// 翻转 LED
 void led_toggle(led_id_t led)
 {
     gpio_bit_toggle(led_hw[led].port, led_hw[led].pin);

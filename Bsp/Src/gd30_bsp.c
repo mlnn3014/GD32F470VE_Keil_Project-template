@@ -4,40 +4,41 @@
 #include "systick.h"
 
 /* PT100 板接在 SPI0：PA5=SCK，PA6=MISO，PA7=MOSI，PE8=CS。 */
-#define GD30_SPI SPI0
-#define GD30_SPI_CLK RCU_SPI0
+#define GD30_SPI SPI0         // GD30 SPI 外设
+#define GD30_SPI_CLK RCU_SPI0 // GD30 SPI 时钟
 
-#define GD30_SPI_PORT GPIOA
+#define GD30_SPI_PORT GPIOA // SPI GPIO 端口
 #define GD30_SPI_PORT_CLK RCU_GPIOA
-#define GD30_PIN_SCK GPIO_PIN_5
-#define GD30_PIN_MISO GPIO_PIN_6
-#define GD30_PIN_MOSI GPIO_PIN_7
+#define GD30_PIN_SCK GPIO_PIN_5   // SCK
+#define GD30_PIN_MISO GPIO_PIN_6  // MISO
+#define GD30_PIN_MOSI GPIO_PIN_7  // MOSI
 
-#define GD30_CS_PORT GPIOE
+#define GD30_CS_PORT GPIOE // CS GPIO 端口
 #define GD30_CS_PORT_CLK RCU_GPIOE
-#define GD30_PIN_CS GPIO_PIN_8
+#define GD30_PIN_CS GPIO_PIN_8 // CS 引脚
 
 /* 外部参考电压寄存器 */
-#define GD30_PROCESS_REGISTER 0x0012
-#define GD30_PROCESS_VALUE 0xACCA
-#define GD30_EXTREF_REGISTER 0x0014
-#define GD30_EXTREF_ENABLE 0x0040
-#define GD30_EXTREF_READ_CMD 0x8106
-#define GD30_EXTREF_WRITE_CMD 0x8100
-#define GD30_SPI_TIMEOUT 100000
+#define GD30_PROCESS_REGISTER 0x0012 // process unlock register
+#define GD30_PROCESS_VALUE 0xACCA    // process unlock value
+#define GD30_EXTREF_REGISTER 0x0014  // external reference register
+#define GD30_EXTREF_ENABLE 0x0040    // AIN3 reference enable bit
+#define GD30_EXTREF_READ_CMD 0x8106  // 扩展寄存器读命令
+#define GD30_EXTREF_WRITE_CMD 0x8100 // 扩展寄存器写命令
+#define GD30_SPI_TIMEOUT 100000      // SPI flag 等待超时
 
 /* CS 时序 */
-#define GD30_CS_SETUP_MS 1
-#define GD30_CS_HOLD_US 100
-#define GD30_CS_RECOVERY_MS 10
-#define GD30_POWER_ON_SETTLE_MS 5
+#define GD30_CS_SETUP_MS 1        // CS 拉低后等待
+#define GD30_CS_HOLD_US 100       // 传输后 CS 保持
+#define GD30_CS_RECOVERY_MS 10    // CS 拉高后恢复时间
+#define GD30_POWER_ON_SETTLE_MS 5 // 上电稳定时间
 
-#define GD30_CONFIG_RETRY 5
-#define GD30_CONFIG_VERIFY_MASK 0x7FE8
+#define GD30_CONFIG_RETRY 5           // 配置读回重试次数
+#define GD30_CONFIG_VERIFY_MASK 0x7FE8 // 配置校验 mask
 
-static uint16_t gd30_extref_register;
-static uint16_t gd30_config_register;
+static uint16_t gd30_extref_register; // 最近读到的 extref 寄存器
+static uint16_t gd30_config_register; // 最近读到的配置寄存器
 
+// 简单 us 级延时，用在 CS hold
 static void gd30_delay_us(uint32_t us)
 {
     uint32_t loops_per_us = SystemCoreClock / 4000000;
@@ -55,6 +56,7 @@ static void gd30_delay_us(uint32_t us)
     }
 }
 
+// 等待 SPI flag 到目标状态
 static int gd30_wait_flag(uint32_t flag, FlagStatus state)
 {
     uint32_t timeout = GD30_SPI_TIMEOUT;
@@ -71,6 +73,7 @@ static int gd30_wait_flag(uint32_t flag, FlagStatus state)
     return 0;
 }
 
+// 清掉 RX FIFO 里残留的数据
 static void gd30_clear_rx(void)
 {
     while (spi_i2s_flag_get(GD30_SPI, SPI_FLAG_RBNE) == SET)
@@ -79,6 +82,7 @@ static void gd30_clear_rx(void)
     }
 }
 
+// 交换 1 个 16bit word
 static int gd30_transfer16_word(uint16_t value, uint16_t *received)
 {
     uint8_t hi = 0;
@@ -112,12 +116,14 @@ static int gd30_transfer16_word(uint16_t value, uint16_t *received)
     return 0;
 }
 
+// 拉低 CS
 static void gd30_select(void)
 {
     gpio_bit_reset(GD30_CS_PORT, GD30_PIN_CS);
     delay_1ms(GD30_CS_SETUP_MS);
 }
 
+// 拉高 CS
 static void gd30_deselect(void)
 {
     gd30_delay_us(GD30_CS_HOLD_US);
@@ -125,6 +131,7 @@ static void gd30_deselect(void)
     delay_1ms(GD30_CS_RECOVERY_MS);
 }
 
+// 初始化 GD30 使用的 SPI bus
 void gd30_bus_init(void)
 {
     spi_parameter_struct spi_init_struct;
@@ -158,6 +165,7 @@ void gd30_bus_init(void)
     delay_1ms(GD30_POWER_ON_SETTLE_MS);
 }
 
+// 写 GD30 扩展寄存器
 static int gd30_write_extended_register(uint16_t address, uint16_t value)
 {
     const uint16_t cmd[] = {
@@ -175,6 +183,7 @@ static int gd30_write_extended_register(uint16_t address, uint16_t value)
     return 0;
 }
 
+// 读 GD30 扩展寄存器
 static int gd30_read_extended_register(uint16_t address, uint16_t *value)
 {
     const uint16_t cmd[] = {
@@ -199,6 +208,7 @@ static int gd30_read_extended_register(uint16_t address, uint16_t *value)
     return 0;
 }
 
+// 打开 AIN3 外部参考源
 uint8_t gd30_bsp_enable_ain3_reference(void)
 {
     uint16_t value;
@@ -229,11 +239,13 @@ uint8_t gd30_bsp_enable_ain3_reference(void)
     return ((value & GD30_EXTREF_ENABLE) != 0) ? 1 : 0;
 }
 
+// 返回缓存的 extref 寄存器
 uint16_t gd30_bsp_get_extref_register(void)
 {
     return gd30_extref_register;
 }
 
+// 写配置字后读回配置寄存器
 static int gd30_read_config_register(uint16_t config, uint16_t *readback)
 {
     const uint16_t tx[2] = {
@@ -254,6 +266,7 @@ static int gd30_read_config_register(uint16_t config, uint16_t *readback)
     return 0;
 }
 
+// 配置 GD30，失败会重试
 uint8_t gd30_bsp_configure(uint16_t config)
 {
     uint32_t attempt;
@@ -276,11 +289,13 @@ uint8_t gd30_bsp_configure(uint16_t config)
     return 0;
 }
 
+// 返回缓存的配置寄存器
 uint16_t gd30_bsp_get_config_register(void)
 {
     return gd30_config_register;
 }
 
+// CS 包住一次 16bit 交换
 int gd30_transfer16(uint16_t tx, uint16_t *rx)
 {
     uint16_t received;
@@ -307,6 +322,7 @@ int gd30_transfer16(uint16_t tx, uint16_t *rx)
     return result;
 }
 
+// CS 包住一组连续 16bit 交换
 int gd30_transfer16_sequence(const uint16_t *tx, uint16_t *rx, uint32_t count)
 {
     int result = 0;

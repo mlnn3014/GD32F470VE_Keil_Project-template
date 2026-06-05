@@ -37,7 +37,7 @@ OF SUCH DAMAGE.
 #include "systick.h"
 #include "ota_bsp.h"
 #include "rs485_bsp.h"
-#include "uart0_bsp.h"
+#include "../../Bsp/Inc/uart0_bsp.h"
 
 /*!
     \brief      this function handles NMI exception
@@ -154,16 +154,19 @@ void USART0_IRQHandler(void)
     uart0_irq_handler();
 }
 
+// RS485 串口中断
 void USART1_IRQHandler(void)
 {
     rs485_irq_handler();
 }
 
+// OTA 串口中断
 void USART2_IRQHandler(void)
 {
     ota_irq_handler();
 }
 
+// UART0 TX DMA 完成中断
 void DMA1_Channel7_IRQHandler(void)
 {
     uart0_tx_dma_irq_handler();

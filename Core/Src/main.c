@@ -5,6 +5,7 @@
 #include "systick.h"
 #include "uart0_bsp.h"
 
+// app 固件入口
 int main(void)
 {
     SCB->VTOR = BL_APP1_START_ADDR;
@@ -19,7 +20,7 @@ int main(void)
 }
 
 #ifdef GD_ECLIPSE_GCC
-/* GCC环境下把printf接到UART0。 */
+// GCC 环境下把 printf 接到 UART0
 int __io_putchar(int ch)
 {
     uint8_t data = (uint8_t)ch;
@@ -28,7 +29,7 @@ int __io_putchar(int ch)
     return ch;
 }
 #else
-/* Keil环境下把printf接到UART0。 */
+// Keil 环境下把 printf 接到 UART0
 int fputc(int ch, FILE *f)
 {
     uint8_t data = (uint8_t)ch;

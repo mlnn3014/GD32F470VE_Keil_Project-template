@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-void adc_init(void);
-uint16_t adc_read(void);
+void adc_init(void);      // 初始化片上 ADC + DMA
+uint16_t adc_read(void);  // 读取最近一次 ADC raw 值
 
 #ifdef __cplusplus
 }
