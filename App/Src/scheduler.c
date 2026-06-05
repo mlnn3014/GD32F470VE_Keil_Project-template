@@ -20,8 +20,8 @@ typedef struct
 
 // 简单轮询任务表
 static task_t tasks[] = {
-    {uart0_task, 5, 0},
-    {rs485_task, 5, 0},
+    {uart0_task, 1, 0},
+    {rs485_task, 1, 0},
     {ota_task, 2, 0},
     {btn_task, 5, 0},
     {pt100_task, 1, 0},

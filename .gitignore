@@ -34,6 +34,7 @@ Tools/bl_host_app/dist/
 *.bak
 *.tmp
 *.swp
+tmp/
 keil_*_comment_check.log
 
 # OS files
