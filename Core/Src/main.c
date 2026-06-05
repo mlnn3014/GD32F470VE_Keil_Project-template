@@ -20,7 +20,7 @@ int main(void)
 }
 
 #ifdef GD_ECLIPSE_GCC
-// GCC 环境下把 printf 接到 UART0
+
 int __io_putchar(int ch)
 {
     uint8_t data = (uint8_t)ch;
@@ -29,7 +29,7 @@ int __io_putchar(int ch)
     return ch;
 }
 #else
-// Keil 环境下把 printf 接到 UART0
+
 int fputc(int ch, FILE *f)
 {
     uint8_t data = (uint8_t)ch;
