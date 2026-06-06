@@ -30,6 +30,17 @@ void dac_set_data(uint16_t mv)
     dac_write(dac_mv_to_raw(mv));
 }
 
+// 设置 DAC 原始值
+void dac_set_raw(uint16_t raw)
+{
+    if (raw > DAC_FULL_SCALE)
+    {
+        raw = DAC_FULL_SCALE;
+    }
+
+    dac_write(raw);
+}
+
 // DAC app 周期任务, 目前没有额外动作
 void dac_task(void)
 {

@@ -9,6 +9,7 @@
 #define LP_SYSCFG_EXTISS0 REG32(SYSCFG_BASE + 0x08U) // EXTI source select
 
 #define LP_EXTI0        BIT(0) // PA0 wakeup line
+#define LP_EXTI22       BIT(22) // RTC wakeup line
 
 #define LP_USART0_RX_DMA DMA_CH2 // UART0 RX DMA
 #define LP_USART0_TX_DMA DMA_CH7 // UART0 TX DMA
@@ -148,6 +149,38 @@ static void low_power_wakeup_exti_init(void)
     nvic_irq_enable(EXTI0_IRQn, 1U, 0U);
 }
 
+// 配置 RTC 10s 唤醒
+static void low_power_rtc_wakeup_10s_init(void)
+{
+    rtc_wakeup_disable();
+    rtc_flag_clear(RTC_FLAG_WT);
+    LP_EXTI_PD = LP_EXTI22;
+    LP_EXTI_INTEN |= LP_EXTI22;
+    LP_EXTI_RTEN |= LP_EXTI22;
+    LP_EXTI_FTEN &= ~LP_EXTI22;
+
+    rtc_wakeup_clock_set(WAKEUP_CKSPRE);
+    rtc_wakeup_timer_set(9);
+    rtc_interrupt_enable(RTC_INT_WAKEUP);
+    rtc_wakeup_enable();
+    nvic_irq_enable(RTC_WKUP_IRQn, 1U, 0U);
+}
+
+// 进入低功耗前关闭外设
+static void low_power_prepare(void)
+{
+    low_power_usart_off();
+    low_power_oled_off();
+    low_power_spi_off();
+    low_power_adc_dac_off();
+    low_power_gpio_state();
+
+    pmu_flag_clear(PMU_FLAG_RESET_WAKEUP);
+    pmu_flag_clear(PMU_FLAG_RESET_STANDBY);
+
+    SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+}
+
 // 进入 deep-sleep, 唤醒后直接复位
 void low_power_enter_deepsleep(void)
 {
@@ -155,17 +188,25 @@ void low_power_enter_deepsleep(void)
 
     __disable_irq();
 
-    low_power_usart_off();
-    low_power_oled_off();
-    low_power_spi_off();
-    low_power_adc_dac_off();
-    low_power_gpio_state();
+    low_power_prepare();
     low_power_wakeup_exti_init();
 
-    pmu_flag_clear(PMU_FLAG_RESET_WAKEUP);
-    pmu_flag_clear(PMU_FLAG_RESET_STANDBY);
+    __enable_irq();
 
-    SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+    pmu_to_deepsleepmode(PMU_LDO_LOWPOWER, PMU_LOWDRIVER_ENABLE, WFI_CMD);
+
+    NVIC_SystemReset();
+}
+
+// 进入 deep-sleep, RTC 10s 唤醒后复位
+void low_power_enter_deepsleep_rtc_10s(void)
+{
+    rcu_periph_clock_enable(RCU_PMU);
+
+    __disable_irq();
+
+    low_power_prepare();
+    low_power_rtc_wakeup_10s_init();
 
     __enable_irq();
 
@@ -179,4 +220,21 @@ void EXTI0_IRQHandler(void)
 {
     LP_EXTI_PD = LP_EXTI0;
     NVIC_SystemReset();
+}
+
+// RTC 10s 唤醒中断
+void RTC_WKUP_IRQHandler(void)
+{
+    rtc_flag_clear(RTC_FLAG_WT);
+    LP_EXTI_PD = LP_EXTI22;
+    NVIC_SystemReset();
+}
+
+// 清除 RTC 唤醒状态
+void low_power_rtc_wakeup_clear(void)
+{
+    rtc_wakeup_disable();
+    rtc_interrupt_disable(RTC_INT_WAKEUP);
+    rtc_flag_clear(RTC_FLAG_WT);
+    LP_EXTI_PD = LP_EXTI22;
 }

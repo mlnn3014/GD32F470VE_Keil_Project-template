@@ -2,6 +2,7 @@
 
 #include "adc_app.h"
 #include "btn_app.h"
+#include "command_app.h"
 #include "dac_app.h"
 #include "oled_app.h"
 #include "ota_app.h"
@@ -22,6 +23,7 @@ typedef struct
 static task_t tasks[] = {
     {uart0_task, 1, 0},
     {rs485_task, 1, 0},
+    {command_app_task, 20, 0},
     {ota_task, 2, 0},
     {btn_task, 5, 0},
     {pt100_task, 1, 0},

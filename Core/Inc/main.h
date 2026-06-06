@@ -39,4 +39,6 @@ OF SUCH DAMAGE.
 #include <stdint.h>
 #include <stdio.h>
 
+extern uint16_t device_id;
+
 #endif /* __MAIN_H */

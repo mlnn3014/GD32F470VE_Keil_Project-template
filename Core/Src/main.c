@@ -5,6 +5,8 @@
 #include "systick.h"
 #include "uart0_bsp.h"
 
+uint16_t device_id = 0x0001;
+
 // app 固件入口
 int main(void)
 {

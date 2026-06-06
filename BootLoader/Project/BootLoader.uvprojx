@@ -425,6 +425,11 @@
               <FilePath>..\Bsp\Src\boot_uart_bsp.c</FilePath>
             </File>
             <File>
+              <FileName>boot_rs485_bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\Src\boot_rs485_bsp.c</FilePath>
+            </File>
+            <File>
               <FileName>onchip_flash_bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Bsp\Src\onchip_flash_bsp.c</FilePath>
@@ -448,6 +453,11 @@
               <FileName>gd32f4xx_misc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_misc.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32f4xx_pmu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Firmware\GD32F4xx_standard_peripheral\Source\gd32f4xx_pmu.c</FilePath>
             </File>
             <File>
               <FileName>gd32f4xx_rcu.c</FileName>

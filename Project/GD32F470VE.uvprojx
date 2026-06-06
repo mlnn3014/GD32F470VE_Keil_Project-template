@@ -415,6 +415,11 @@
               <FilePath>..\App\Src\rtc_app.c</FilePath>
             </File>
             <File>
+              <FileName>param_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Src\param_app.c</FilePath>
+            </File>
+            <File>
               <FileName>scheduler.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\Src\scheduler.c</FilePath>

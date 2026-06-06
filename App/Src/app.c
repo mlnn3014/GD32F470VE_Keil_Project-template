@@ -8,9 +8,11 @@
 #include "gd30_bsp.h"
 #include "led_app.h"
 #include "low_power_app.h"
+#include "main.h"
 #include "oled.h"
 #include "ota_app.h"
 #include "ota_bsp.h"
+#include "param_app.h"
 #include "pt100_app.h"
 #include "rs485_app.h"
 #include "rs485_bsp.h"
@@ -26,12 +28,15 @@ void app_init(void)
 
     uart0_init();
 
+    flash_init();
+    param_app_init();
+    device_id = param_get_device_id();
+
     rs485_init();
 
     ota_init();
     ota_app_init();
 
-    flash_init();
     gd30_bus_init();
     pt100_app_init();
 

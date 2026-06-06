@@ -36,6 +36,7 @@ Tools/bl_host_app/dist/
 *.swp
 tmp/
 keil_*_comment_check.log
+*_build.log
 
 # OS files
 Thumbs.db

@@ -1,12 +1,31 @@
 #include "rs485_bsp.h"
 
 #include "gd32f4xx.h"
+#include "param_app.h"
 #include "ring_buffer.h"
+
+static uint32_t rs485_baud_from_code(uint8_t code)
+{
+    switch (code)
+    {
+    case 0x11:
+        return 4800;
+
+    case 0x12:
+        return 9600;
+
+    case 0x14:
+        return 115200;
+
+    case 0x13:
+    default:
+        return 19200;
+    }
+}
 
 #define RS485_PERIPH        USART1 // RS485 使用 USART1
 #define RS485_CLOCK         RCU_USART1
 #define RS485_IRQn          USART1_IRQn
-#define RS485_BAUDRATE      115200
 #define RS485_DATA_REG      ((uint32_t)&USART_DATA(RS485_PERIPH)) // USART 数据寄存器
 
 #define RS485_GPIO_CLOCK    RCU_GPIOA
@@ -247,7 +266,7 @@ void rs485_init(void)
     rs485_set_rx_mode();
 
     usart_deinit(RS485_PERIPH);
-    usart_baudrate_set(RS485_PERIPH, RS485_BAUDRATE);
+    usart_baudrate_set(RS485_PERIPH, rs485_baud_from_code(param_get_baud_code()));
     usart_receive_config(RS485_PERIPH, USART_RECEIVE_ENABLE);
     usart_transmit_config(RS485_PERIPH, USART_TRANSMIT_ENABLE);
 

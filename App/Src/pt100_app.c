@@ -3,8 +3,8 @@
 #include "gd30_bsp.h"
 #include "gd30ad3344.h"
 #include "pt100_convert.h"
-#include "rs485_app.h"
 #include "systick.h"
+#include "uart0_app.h"
 
 #define PT100_PGA GD30_PGA_2V048        // PT100 ADC PGA 档位
 #define PT100_RATE GD30_RATE_12_5SPS    // PT100 采样率
@@ -103,7 +103,7 @@ static void save_adc(int16_t raw)
     }
 }
 
-// 通过 RS485 打印 PT100 当前值
+// 通过 UART0 打印 PT100 当前值, 不占用 RS485 测评通道
 static void report_pt100(void)
 {
     int32_t temp = pt100.temp;
@@ -112,14 +112,14 @@ static void report_pt100(void)
 
     if (!pt100.ok)
     {
-        rs485_printf("PT100 %s raw=%d adc=%lduV\r\n",
+        uart0_printf("PT100 %s raw=%d adc=%lduV\r\n",
                      pt100_status_text(pt100.status),
                      pt100.raw,
                      (long)pt100.ain0_uv);
         return;
     }
 
-    rs485_printf("PT100 %c%ld.%02ldC R=%ldohm adc=%lduV ref=%s\r\n",
+    uart0_printf("PT100 %c%ld.%02ldC R=%ldohm adc=%lduV ref=%s\r\n",
                  sign,
                  (long)(temp_abs / 100),
                  (long)(temp_abs % 100),

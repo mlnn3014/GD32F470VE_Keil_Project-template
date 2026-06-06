@@ -22,7 +22,7 @@ uint16_t received_len = 0;                  // 已接收字符串长度
 uint16_t total_len = 0;                     // 字符串应有长度
 
 // 把一个 ASCII 十六进制字符转换成数值
-int8_t hex_value(char ch)
+static int8_t hex_value(char ch)
 {
     if (ch >= '0' && ch <= '9')
         return ch - '0';
@@ -117,7 +117,7 @@ static void rs485_parse_char(char ch)
     // 第三个字符必须是 '6'
     if (received_len == 4)
     {
-        if (rx_msg_buf[3] != 'B')
+        if (rx_msg_buf[3] != '6')
         {
             received_len = 0;
         }
