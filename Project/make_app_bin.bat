@@ -34,22 +34,14 @@ exit /b 1
 "%FROMELF%" --bin --output="App.bin" "Project.axf"
 if errorlevel 1 exit /b %ERRORLEVEL%
 set "APP_BIN=App.bin"
-goto pack_raw_ota
+goto done
 
 :make_in_project
 "%FROMELF%" --bin --output=".\output\App.bin" ".\output\Project.axf"
 if errorlevel 1 exit /b %ERRORLEVEL%
 set "APP_BIN=.\output\App.bin"
-goto pack_raw_ota
+goto done
 
-:pack_raw_ota
-py -3 ..\Tools\pack_raw_ota.py "%APP_BIN%"
-if errorlevel 1 exit /b %ERRORLEVEL%
-
-if "%APP_BIN%"=="App.bin" (
-    echo OTA package: .\App_raw_ota.bin
-) else (
-    echo OTA package: .\output\App_raw_ota.bin
-)
-echo Send this file with official serial file-send tool.
+:done
+echo APP bin: %APP_BIN%
 exit /b 0

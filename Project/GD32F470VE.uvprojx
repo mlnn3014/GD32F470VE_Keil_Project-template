@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_projx.xsd">
 
   <SchemaVersion>2.1</SchemaVersion>
@@ -18,27 +18,27 @@
           <Vendor>GigaDevice</Vendor>
           <PackID>GigaDevice.GD32F4xx_DFP.3.0.3</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
-          <Cpu>IRAM(0x20000000,0x030000) IRAM2(0x10000000,0x010000) IROM(0x0800D000,0x038000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
-          <FlashUtilSpec></FlashUtilSpec>
-          <StartupFile></StartupFile>
+          <Cpu>IRAM(0x20000000,0x030000) IRAM2(0x10000000,0x010000) IROM(0x08011000,0x020000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <FlashUtilSpec />
+          <StartupFile />
           <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F4xx_512KB -FS08000000 -FL080000 -FP0(.\local_device\Flash\GD32F4xx_512KB.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile>..\Driver\CMSIS\GD\GD32F4xx\Include\gd32f4xx.h</RegisterFile>
-          <MemoryEnv></MemoryEnv>
-          <Cmp></Cmp>
-          <Asm></Asm>
-          <Linker></Linker>
-          <OHString></OHString>
-          <InfinionOptionDll></InfinionOptionDll>
-          <SLE66CMisc></SLE66CMisc>
-          <SLE66AMisc></SLE66AMisc>
-          <SLE66LinkerMisc></SLE66LinkerMisc>
+          <MemoryEnv />
+          <Cmp />
+          <Asm />
+          <Linker />
+          <OHString />
+          <InfinionOptionDll />
+          <SLE66CMisc />
+          <SLE66AMisc />
+          <SLE66LinkerMisc />
           <SFDFile>.\local_device\SVD\GD32F4xx.svd</SFDFile>
           <bCustSvd>1</bCustSvd>
           <UseEnv>0</UseEnv>
-          <BinPath></BinPath>
-          <IncludePath></IncludePath>
-          <LibPath></LibPath>
+          <BinPath />
+          <IncludePath />
+          <LibPath />
           <RegisterFilePath>..\Driver\CMSIS\GD\GD32F4xx\Include</RegisterFilePath>
           <DBRegisterFilePath>..\Driver\CMSIS\GD\GD32F4xx\Include</DBRegisterFilePath>
           <TargetStatus>
@@ -62,8 +62,8 @@
           <BeforeCompile>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name></UserProg1Name>
-            <UserProg2Name></UserProg2Name>
+            <UserProg1Name />
+            <UserProg2Name />
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopU1X>0</nStopU1X>
@@ -72,8 +72,8 @@
           <BeforeMake>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name></UserProg1Name>
-            <UserProg2Name></UserProg2Name>
+            <UserProg1Name />
+            <UserProg2Name />
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopB1X>0</nStopB1X>
@@ -82,7 +82,7 @@
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name></UserProg1Name>
+            <UserProg1Name />
             <UserProg2Name>cmd /c call .\make_app_bin.bat &amp; exit /b 0</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -90,7 +90,7 @@
             <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
-          <SVCSIdString></SVCSIdString>
+          <SVCSIdString />
         </TargetCommonOption>
         <CommonProperty>
           <UseCPPCompiler>0</UseCPPCompiler>
@@ -104,8 +104,8 @@
           <AssembleAssemblyFile>0</AssembleAssemblyFile>
           <PublicsOnly>0</PublicsOnly>
           <StopOnExitCode>3</StopOnExitCode>
-          <CustomArgument></CustomArgument>
-          <IncludeLibraryModules></IncludeLibraryModules>
+          <CustomArgument />
+          <IncludeLibraryModules />
           <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
@@ -139,10 +139,10 @@
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
           <Flash3>"" ()</Flash3>
-          <Flash4></Flash4>
-          <pFcarmOut></pFcarmOut>
-          <pFcarmGrp></pFcarmGrp>
-          <pFcArmRoot></pFcArmRoot>
+          <Flash4 />
+          <pFcarmOut />
+          <pFcarmGrp />
+          <pFcArmRoot />
           <FcArmLst>0</FcArmLst>
         </Utilities>
         <TargetArmAds>
@@ -175,7 +175,7 @@
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M4"</AdsCpuType>
-            <RvctDeviceName></RvctDeviceName>
+            <RvctDeviceName />
             <mOS>0</mOS>
             <uocRom>0</uocRom>
             <uocRam>0</uocRam>
@@ -251,8 +251,8 @@
               </IRAM>
               <IROM>
                 <Type>1</Type>
-                <StartAddress>0x800d000</StartAddress>
-                <Size>0x38000</Size>
+                <StartAddress>0x8011000</StartAddress>
+                <Size>0x20000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -276,8 +276,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x800d000</StartAddress>
-                <Size>0x38000</Size>
+                <StartAddress>0x8011000</StartAddress>
+                <Size>0x20000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -310,7 +310,7 @@
                 <Size>0x10000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
-            <RvctStartVector></RvctStartVector>
+            <RvctStartVector />
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
@@ -337,10 +337,10 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls />
               <Define>USE_STDPERIPH_DRIVER,GD32F470,__PERF_COUNTER_CFG_USE_SYSTICK_WRAPPER__</Define>
-              <Undefine></Undefine>
-              <IncludePath>..\common;..\Core\Inc;..\App\Inc;..\Bsp\Inc;..\Components\gd30ad3344;..\Components\oled;..\Components\gd25qxx;..\Components\ring_buffer;..\Firmware\GD32F4xx_standard_peripheral\Include;..\.cmsis\include;..\Firmware\CMSIS;..\Firmware\CMSIS\GD\GD32F4xx\Include</IncludePath>
+              <Undefine />
+              <IncludePath>..\common;..\Core\Inc;..\Function\Inc;..\Protocol\Inc;..\Driver\Inc;..\Components\gd30ad3344;..\Components\oled;..\Components\gd25qxx;..\Components\ring_buffer;..\Firmware\GD32F4xx_standard_peripheral\Include;..\.cmsis\include;..\Firmware\CMSIS;..\Firmware\CMSIS\GD\GD32F4xx\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -355,10 +355,10 @@
             <useXO>0</useXO>
             <ClangAsOpt>1</ClangAsOpt>
             <VariousControls>
-              <MiscControls></MiscControls>
-              <Define></Define>
-              <Undefine></Undefine>
-              <IncludePath></IncludePath>
+              <MiscControls />
+              <Define />
+              <Undefine />
+              <IncludePath />
             </VariousControls>
           </Aads>
           <LDads>
@@ -368,101 +368,96 @@
             <noStLib>0</noStLib>
             <RepFail>1</RepFail>
             <useFile>1</useFile>
-            <TextAddressRange>0x0800D000</TextAddressRange>
+            <TextAddressRange>0x08011000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
-            <pXoBase></pXoBase>
+            <pXoBase />
             <ScatterFile>.\App_F470.sct</ScatterFile>
-            <IncludeLibs></IncludeLibs>
-            <IncludeLibsPath></IncludeLibsPath>
-            <Misc></Misc>
-            <LinkerInputFile></LinkerInputFile>
-            <DisabledWarnings></DisabledWarnings>
+            <IncludeLibs />
+            <IncludeLibsPath />
+            <Misc />
+            <LinkerInputFile />
+            <DisabledWarnings />
           </LDads>
         </TargetArmAds>
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>App</GroupName>
+          <GroupName>Function</GroupName>
           <Files>
             <File>
               <FileName>app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\app.c</FilePath>
+              <FilePath>..\Function\Src\app.c</FilePath>
             </File>
             <File>
               <FileName>adc_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\adc_app.c</FilePath>
-            </File>
-            <File>
-              <FileName>btn_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\Src\btn_app.c</FilePath>
+              <FilePath>..\Function\Src\adc_app.c</FilePath>
             </File>
             <File>
               <FileName>led_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\led_app.c</FilePath>
+              <FilePath>..\Function\Src\led_app.c</FilePath>
             </File>
             <File>
               <FileName>oled_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\oled_app.c</FilePath>
+              <FilePath>..\Function\Src\oled_app.c</FilePath>
             </File>
             <File>
               <FileName>rtc_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\rtc_app.c</FilePath>
+              <FilePath>..\Function\Src\rtc_app.c</FilePath>
             </File>
             <File>
               <FileName>param_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\param_app.c</FilePath>
+              <FilePath>..\Function\Src\param_app.c</FilePath>
             </File>
             <File>
               <FileName>scheduler.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\scheduler.c</FilePath>
+              <FilePath>..\Function\Src\scheduler.c</FilePath>
             </File>
             <File>
               <FileName>dac_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\dac_app.c</FilePath>
+              <FilePath>..\Function\Src\dac_app.c</FilePath>
             </File>
             <File>
               <FileName>uart0_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\uart0_app.c</FilePath>
-            </File>
-            <File>
-              <FileName>rs485_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\Src\rs485_app.c</FilePath>
-            </File>
-            <File>
-              <FileName>command_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\Src\command_app.c</FilePath>
+              <FilePath>..\Function\Src\uart0_app.c</FilePath>
             </File>
             <File>
               <FileName>pt100_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\pt100_app.c</FilePath>
+              <FilePath>..\Function\Src\pt100_app.c</FilePath>
             </File>
             <File>
               <FileName>pt100_convert.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\pt100_convert.c</FilePath>
-            </File>
-            <File>
-              <FileName>ota_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\Src\ota_app.c</FilePath>
+              <FilePath>..\Function\Src\pt100_convert.c</FilePath>
             </File>
             <File>
               <FileName>low_power_app.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\App\Src\low_power_app.c</FilePath>
+              <FilePath>..\Function\Src\low_power_app.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Protocol</GroupName>
+          <Files>
+            <File>
+              <FileName>rs485_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Protocol\Src\rs485_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>command_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Protocol\Src\command_app.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -492,72 +487,62 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Bsp</GroupName>
+          <GroupName>Driver</GroupName>
           <Files>
             <File>
               <FileName>adc_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\adc_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\adc_bsp.c</FilePath>
             </File>
             <File>
               <FileName>dac_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\dac_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\dac_bsp.c</FilePath>
             </File>
             <File>
               <FileName>uart0_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\uart0_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\uart0_bsp.c</FilePath>
             </File>
             <File>
               <FileName>rs485_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\rs485_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\rs485_bsp.c</FilePath>
             </File>
             <File>
               <FileName>rtc_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\rtc_bsp.c</FilePath>
-            </File>
-            <File>
-              <FileName>btn_bsp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\btn_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\rtc_bsp.c</FilePath>
             </File>
             <File>
               <FileName>led_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\led_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\led_bsp.c</FilePath>
             </File>
             <File>
               <FileName>oled_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\oled_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\oled_bsp.c</FilePath>
             </File>
             <File>
               <FileName>low_power_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\low_power_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\low_power_bsp.c</FilePath>
             </File>
             <File>
               <FileName>flash_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\flash_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\flash_bsp.c</FilePath>
             </File>
             <File>
               <FileName>gd30_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\gd30_bsp.c</FilePath>
-            </File>
-            <File>
-              <FileName>ota_bsp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\ota_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\gd30_bsp.c</FilePath>
             </File>
             <File>
               <FileName>onchip_flash_bsp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Bsp\Src\onchip_flash_bsp.c</FilePath>
+              <FilePath>..\Driver\Src\onchip_flash_bsp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -692,16 +677,16 @@
   </Targets>
 
   <RTE>
-    <apis/>
+    <apis />
     <components>
       <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="6.1.0" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.7.36" url="https://www.keil.com/pack/" vendor="ARM" version="6.1.0"/>
+        <package name="CMSIS" schemaVersion="1.7.36" url="https://www.keil.com/pack/" vendor="ARM" version="6.1.0" />
         <targetInfos>
-          <targetInfo name="GD32F470VET6_Project"/>
+          <targetInfo name="GD32F470VET6_Project" />
         </targetInfos>
       </component>
     </components>
-    <files/>
+    <files />
   </RTE>
 
   <LayerInfo>

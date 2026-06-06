@@ -35,7 +35,9 @@ typedef struct
     uint32_t fail_counter;    // 升级失败次数
     uint32_t last_error;      // 最近一次错误码
     uint32_t log_write_index; // 日志写位置, 预留
-    uint32_t reserved[51];    // 保留字段
+    uint32_t comm_baud_code;  // APP 同步给 BootLoader 的波特率代码
+    uint32_t comm_device_id;  // APP 同步给 BootLoader 的设备 ID
+    uint32_t reserved[49];    // 保留字段
     uint32_t param_crc32;     // 参数区 CRC32
     uint32_t tail_magic;      // 尾部 magic
 } bl_param_t;

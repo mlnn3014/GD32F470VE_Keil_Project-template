@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <ProjectOpt xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_optx.xsd">
 
   <SchemaVersion>1.0</SchemaVersion>
@@ -104,16 +104,16 @@
         <bSchkAxf>0</bSchkAxf>
         <bTchkAxf>0</bTchkAxf>
         <nTsel>0</nTsel>
-        <sDll></sDll>
-        <sDllPa></sDllPa>
-        <sDlgDll></sDlgDll>
-        <sDlgPa></sDlgPa>
-        <sIfile></sIfile>
-        <tDll></tDll>
-        <tDllPa></tDllPa>
-        <tDlgDll></tDlgDll>
-        <tDlgPa></tDlgPa>
-        <tIfile></tIfile>
+        <sDll />
+        <sDllPa />
+        <sDlgDll />
+        <sDlgPa />
+        <sIfile />
+        <tDll />
+        <tDllPa />
+        <tDlgDll />
+        <tDlgPa />
+        <tIfile />
         <pMon>BIN\UL2CM3.DLL</pMon>
       </DebugOpt>
       <TargetDriverDllRegistry>
@@ -123,7 +123,7 @@
           <Name>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F4xx_512KB -FS08000000 -FL080000 -FP0($$Device:GD32F470VE$Flash\GD32F4xx_512KB.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint/>
+      <Breakpoint />
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>
@@ -153,24 +153,24 @@
         <newCpu>0</newCpu>
         <uProt>0</uProt>
       </DebugFlag>
-      <LintExecutable></LintExecutable>
-      <LintConfigFile></LintConfigFile>
+      <LintExecutable />
+      <LintConfigFile />
       <bLintAuto>0</bLintAuto>
       <bAutoGenD>0</bAutoGenD>
       <LntExFlags>0</LntExFlags>
-      <pMisraName></pMisraName>
-      <pszMrule></pszMrule>
-      <pSingCmds></pSingCmds>
-      <pMultCmds></pMultCmds>
-      <pMisraNamep></pMisraNamep>
-      <pszMrulep></pszMrulep>
-      <pSingCmdsp></pSingCmdsp>
-      <pMultCmdsp></pMultCmdsp>
+      <pMisraName />
+      <pszMrule />
+      <pSingCmds />
+      <pMultCmds />
+      <pMisraNamep />
+      <pszMrulep />
+      <pSingCmdsp />
+      <pMultCmdsp />
     </TargetOption>
   </Target>
 
   <Group>
-    <GroupName>App</GroupName>
+    <GroupName>Function</GroupName>
     <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
@@ -182,7 +182,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\app.c</PathWithFileName>
       <FilenameWithoutPath>app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -194,20 +194,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\adc_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\adc_app.c</PathWithFileName>
       <FilenameWithoutPath>adc_app.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>1</GroupNumber>
-      <FileNumber>3</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\btn_app.c</PathWithFileName>
-      <FilenameWithoutPath>btn_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -218,7 +206,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\led_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\led_app.c</PathWithFileName>
       <FilenameWithoutPath>led_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -230,7 +218,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\oled_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\oled_app.c</PathWithFileName>
       <FilenameWithoutPath>oled_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -242,7 +230,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\rtc_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\rtc_app.c</PathWithFileName>
       <FilenameWithoutPath>rtc_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -254,7 +242,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\scheduler.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\scheduler.c</PathWithFileName>
       <FilenameWithoutPath>scheduler.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -266,7 +254,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\dac_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\dac_app.c</PathWithFileName>
       <FilenameWithoutPath>dac_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -278,7 +266,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\uart0_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\uart0_app.c</PathWithFileName>
       <FilenameWithoutPath>uart0_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -290,7 +278,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\rs485_app.c</PathWithFileName>
+      <PathWithFileName>..\Protocol\Src\rs485_app.c</PathWithFileName>
       <FilenameWithoutPath>rs485_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -302,7 +290,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\command_app.c</PathWithFileName>
+      <PathWithFileName>..\Protocol\Src\command_app.c</PathWithFileName>
       <FilenameWithoutPath>command_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -314,7 +302,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\pt100_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\pt100_app.c</PathWithFileName>
       <FilenameWithoutPath>pt100_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -326,20 +314,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\pt100_convert.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\pt100_convert.c</PathWithFileName>
       <FilenameWithoutPath>pt100_convert.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>1</GroupNumber>
-      <FileNumber>14</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\ota_app.c</PathWithFileName>
-      <FilenameWithoutPath>ota_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -350,7 +326,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\App\Src\low_power_app.c</PathWithFileName>
+      <PathWithFileName>..\Function\Src\low_power_app.c</PathWithFileName>
       <FilenameWithoutPath>low_power_app.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -414,7 +390,7 @@
   </Group>
 
   <Group>
-    <GroupName>Bsp</GroupName>
+    <GroupName>Driver</GroupName>
     <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
@@ -426,7 +402,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\adc_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\adc_bsp.c</PathWithFileName>
       <FilenameWithoutPath>adc_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -438,7 +414,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\dac_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\dac_bsp.c</PathWithFileName>
       <FilenameWithoutPath>dac_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -450,7 +426,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\uart0_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\uart0_bsp.c</PathWithFileName>
       <FilenameWithoutPath>uart0_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -462,7 +438,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\rs485_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\rs485_bsp.c</PathWithFileName>
       <FilenameWithoutPath>rs485_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -474,20 +450,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\rtc_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\rtc_bsp.c</PathWithFileName>
       <FilenameWithoutPath>rtc_bsp.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>25</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\btn_bsp.c</PathWithFileName>
-      <FilenameWithoutPath>btn_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -498,7 +462,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\led_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\led_bsp.c</PathWithFileName>
       <FilenameWithoutPath>led_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -510,7 +474,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\oled_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\oled_bsp.c</PathWithFileName>
       <FilenameWithoutPath>oled_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -522,7 +486,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\low_power_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\low_power_bsp.c</PathWithFileName>
       <FilenameWithoutPath>low_power_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -534,7 +498,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\flash_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\flash_bsp.c</PathWithFileName>
       <FilenameWithoutPath>flash_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -546,20 +510,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\gd30_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\gd30_bsp.c</PathWithFileName>
       <FilenameWithoutPath>gd30_bsp.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>3</GroupNumber>
-      <FileNumber>31</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\ota_bsp.c</PathWithFileName>
-      <FilenameWithoutPath>ota_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -570,7 +522,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Bsp\Src\onchip_flash_bsp.c</PathWithFileName>
+      <PathWithFileName>..\Driver\Src\onchip_flash_bsp.c</PathWithFileName>
       <FilenameWithoutPath>onchip_flash_bsp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
