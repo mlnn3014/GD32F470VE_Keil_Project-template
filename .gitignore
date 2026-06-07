@@ -42,5 +42,7 @@ keil_*_comment_check.log
 Thumbs.db
 Desktop.ini
 
+评审报告/LocalBuild/
+
 # Large local reference bundles
 Docs/第十九届西门子杯嵌入式赛道竞赛资料/
