@@ -16,7 +16,7 @@ uint8_t low_power_app_init(void)
     {
         RTC_BKP1 = 0;
         low_power_rtc_wakeup_clear();
-        rs485_printf("instrument wakeup\r\n");
+        rs485_printf("instrument wakeup");
         return 1;
     }
 

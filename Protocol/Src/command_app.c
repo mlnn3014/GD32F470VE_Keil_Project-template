@@ -474,7 +474,7 @@ static void alarm_log_add(const char *channel, float threshold, float value)
 // 打印一条告警字符串
 static void alarm_log_print(const alarm_log_t *log)
 {
-    rs485_printf("%04u-%02u-%02u %02u:%02u:%02u | %s | %.2f | %.2f\r\n",
+    rs485_printf("%04u-%02u-%02u %02u:%02u:%02u | %s | %.2f | %.2f",
                  log->time.year,
                  log->time.month,
                  log->time.day,
@@ -1020,7 +1020,7 @@ void handle_alarm_cmd(const rx_msg_t *msg)
 
         if (alarm_log_count == 0)
         {
-            rs485_printf("empty\r\n");
+            rs485_printf("empty");
             break;
         }
 

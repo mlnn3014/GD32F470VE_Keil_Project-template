@@ -652,16 +652,16 @@ static uint8_t boot_handle_update(bl_param_t *param)
 
 static void boot_wait_print_scored_info(void)
 {
-    BOOT_RS485_WRITE_LITERAL("system init\r\n");
-    BOOT_RS485_WRITE_LITERAL("Application Version 2.0.1.0\r\n");
+    BOOT_RS485_WRITE_LITERAL("system init");
+    BOOT_RS485_WRITE_LITERAL("Application Version 2.0.1.0");
 }
 
 static void boot_wait_print_start(void)
 {
     boot_wait_print_scored_info();
     // 这些字符串题目说要直接打出来
-    BOOT_RS485_WRITE_LITERAL("using command to interrupt start Application\r\n");
-    BOOT_RS485_WRITE_LITERAL("wait for start Application(10s)......\r\n");
+    BOOT_RS485_WRITE_LITERAL("using command to interrupt start Application");
+    BOOT_RS485_WRITE_LITERAL("wait for start Application(10s)......");
 }
 
 static void boot_wait_print_tick(uint32_t elapsed_ms, uint8_t *step, uint8_t *banner_step)
@@ -675,19 +675,19 @@ static void boot_wait_print_tick(uint32_t elapsed_ms, uint8_t *step, uint8_t *ba
 
     if ((*step == 0) && (elapsed_ms >= 3000UL))
     {
-        BOOT_RS485_WRITE_LITERAL("wait for start Application(7s)......\r\n");
+        BOOT_RS485_WRITE_LITERAL("wait for start Application(7s)......");
         *step = 1;
     }
 
     if ((*step == 1) && (elapsed_ms >= 6000UL))
     {
-        BOOT_RS485_WRITE_LITERAL("wait for start Application(4s)......\r\n");
+        BOOT_RS485_WRITE_LITERAL("wait for start Application(4s)......");
         *step = 2;
     }
 
     if ((*step == 2) && (elapsed_ms >= 9000UL))
     {
-        BOOT_RS485_WRITE_LITERAL("wait for start Application(1s)......\r\n");
+        BOOT_RS485_WRITE_LITERAL("wait for start Application(1s)......");
         *step = 3;
     }
 }
